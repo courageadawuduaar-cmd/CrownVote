@@ -1,0 +1,144 @@
+{% extends 'base/base.html' %}
+{% block title %}Awaiting Payment — CrownVote{% endblock %}
+
+{% block content %}
+<section class="section" style="min-height:80vh; display:flex; align-items:center; justify-content:center; padding:3rem 1.5rem;">
+  <div style="width:100%; max-width:480px; text-align:center;">
+
+    <!-- Nominee Info -->
+    <div style="background:var(--ash); border-radius:20px; padding:1.5rem; margin-bottom:1.5rem; border-bottom:4px solid var(--gold);">
+      <div style="width:70px; height:70px; border-radius:50%; overflow:hidden; margin:0 auto 0.75rem; border:3px solid var(--gold); background:var(--ash-light); display:flex; align-items:center; justify-content:center; font-size:2rem; color:var(--gold);">
+        {% if nominee.photo %}
+          <img src="{{ nominee.photo.url }}" alt="{{ nominee.name }}" style="width:100%;height:100%;object-fit:cover;">
+        {% else %}♛{% endif %}
+      </div>
+      <h3 style="color:white; margin-bottom:0.2rem;">{{ nominee.name }}</h3>
+      <p style="color:var(--gold); font-size:0.85rem;">{{ nominee.category.name }}</p>
+    </div>
+
+    <!-- Waiting Panel -->
+    <div class="vote-panel" style="padding:2rem;">
+
+      <!-- Spinner -->
+      <div style="margin-bottom:1.5rem;">
+        <div id="spinnerIcon" style="font-size:3.5rem; animation:spin 2s linear infinite; display:inline-block;">⏳</div>
+      </div>
+
+      <h2 style="margin-bottom:0.5rem;" id="statusTitle">Awaiting Payment</h2>
+      <p style="color:var(--gray-600); margin-bottom:1.5rem;" id="statusMsg">
+        Complete the payment on your phone, then we'll automatically redirect you.
+      </p>
+
+      <!-- Order Summary -->
+      <div style="background:var(--gray-100); border-radius:12px; padding:1.25rem; margin-bottom:1.5rem; text-align:left;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem; font-size:0.88rem;">
+          <span style="color:var(--gray-600);">Votes</span>
+          <strong>{{ transaction.vote_quantity }}</strong>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem; font-size:0.88rem;">
+          <span style="color:var(--gray-600);">Phone</span>
+          <strong>{{ transaction.phone_number }}</strong>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem; font-size:0.88rem;">
+          <span style="color:var(--gray-600);">Network</span>
+          <strong>{{ transaction.get_network_display }}</strong>
+        </div>
+        <div style="border-top:1px solid var(--gray-200); padding-top:0.75rem; margin-top:0.5rem; display:flex; justify-content:space-between;">
+          <span style="font-weight:700;">Amount</span>
+          <span style="font-weight:800; color:var(--red); font-size:1.1rem;">₵{{ transaction.amount }}</span>
+        </div>
+      </div>
+
+      <!-- Progress dots -->
+      <div style="display:flex; justify-content:center; gap:0.5rem; margin-bottom:1.5rem;" id="dots">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+
+      <!-- Open Paystack Button -->
+      <a href="{{ paystack_url }}" target="_blank"
+         class="btn btn-primary btn-block btn-lg" style="margin-bottom:1rem;"
+         id="paystackBtn">
+        💳 Open Payment Page
+      </a>
+
+      <p style="font-size:0.78rem; color:var(--gray-400);">
+        🔒 Secured by Paystack · This page auto-updates every 3 seconds
+      </p>
+
+      <div style="margin-top:1rem; font-size:0.78rem; color:var(--gray-400);">
+        Ref: <code>{{ transaction.reference }}</code>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+@keyframes spin {
+  0%   { transform: rotate(0deg);   }
+  100% { transform: rotate(360deg); }
+}
+.dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--gold);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+.dot:nth-child(2) { animation-delay: 0.2s; }
+.dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes pulse {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50%       { opacity: 1;   transform: scale(1.2); }
+}
+</style>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const STATUS_URL  = '/voting/status/{{ transaction.reference }}/';
+let   pollCount   = 0;
+const MAX_POLLS   = 60; // 3 minutes max
+
+function checkStatus() {
+  if (pollCount >= MAX_POLLS) {
+    document.getElementById('statusTitle').textContent = 'Taking too long?';
+    document.getElementById('statusMsg').textContent   =
+      'Your payment may still be processing. Check back shortly or try again.';
+    document.getElementById('spinnerIcon').textContent = '⚠️';
+    return;
+  }
+
+  pollCount++;
+
+  fetch(STATUS_URL)
+    .then(r => r.json())
+    .then(data => {
+      if (data.status === 'success') {
+        document.getElementById('spinnerIcon').textContent = '✅';
+        document.getElementById('statusTitle').textContent = 'Payment Confirmed!';
+        document.getElementById('statusMsg').textContent   = 'Redirecting you now...';
+        document.getElementById('dots').style.display      = 'none';
+        setTimeout(() => window.location.href = data.redirect_url, 1000);
+
+      } else if (data.status === 'failed') {
+        document.getElementById('spinnerIcon').textContent = '❌';
+        document.getElementById('statusTitle').textContent = 'Payment Failed';
+        document.getElementById('statusMsg').textContent   = 'Your payment was not completed. Redirecting...';
+        document.getElementById('dots').style.display      = 'none';
+        setTimeout(() => window.location.href = data.redirect_url, 2000);
+
+      } else {
+        // Still pending — poll again in 3 seconds
+        setTimeout(checkStatus, 3000);
+      }
+    })
+    .catch(() => setTimeout(checkStatus, 3000));
+}
+
+// Start polling after 3 seconds
+setTimeout(checkStatus, 3000);
+</script>
+{% endblock %}

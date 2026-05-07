@@ -1,0 +1,104 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}Vote for {{ nominee.name }} — CrownVote{% endblock %}
+
+{% block content %}
+<section class="section" style="min-height:80vh; display:flex; align-items:center; justify-content:center; padding:3rem 1.5rem;">
+  <div style="width:100%; max-width:520px;">
+
+    <!-- Nominee Info Card -->
+    <div style="background:var(--ash); border-radius:20px; padding:2rem; text-align:center; margin-bottom:1.5rem; border-bottom:4px solid var(--gold);">
+      <div style="width:90px; height:90px; border-radius:50%; overflow:hidden; margin:0 auto 1rem; border:3px solid var(--gold); background:var(--ash-light); display:flex; align-items:center; justify-content:center; font-size:2.5rem; color:var(--gold);">
+        {% if nominee.photo %}
+          <img src="{{ nominee.photo.url }}" alt="{{ nominee.name }}" style="width:100%;height:100%;object-fit:cover;">
+        {% else %}♛{% endif %}
+      </div>
+      <h3 style="color:white; margin-bottom:0.25rem;">{{ nominee.name }}</h3>
+
+      <!-- Short code badge -->
+      <div style="margin-bottom:0.5rem;">
+      <span class="short-code-badge lg on-dark">{{ nominee.short_code }}</span>
+      </div>
+      <p style="color:var(--gold); font-size:0.88rem;">{{ nominee.category.name }} · {{ nominee.category.event.title }}</p>
+      <div style="margin-top:1rem; background:rgba(255,255,255,0.07); border-radius:10px; padding:0.75rem 1.5rem; display:inline-block;">
+        <span style="color:var(--gray-400); font-size:0.82rem;">Current votes</span>
+        <span style="color:var(--gold); font-weight:800; font-size:1.1rem; margin-left:0.75rem;">{{ nominee.total_votes }}</span>
+      </div>
+    </div>
+
+    <!-- Vote Panel -->
+    <div class="vote-panel">
+      <h2 style="text-align:center; margin-bottom:0.25rem;">Cast Your Votes</h2>
+      <p class="subtitle">₵1 = 1 Vote · Unlimited voting allowed</p>
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+
+      <form method="post" id="voteForm">
+        {% csrf_token %}
+
+        <!-- Vote Quantity -->
+        <label class="form-label" style="text-align:center; display:block; margin-bottom:0.5rem;">Number of Votes</label>
+        <div class="vote-quantity-control">
+          <button type="button" class="qty-btn" onclick="changeQty(-1)">−</button>
+          <div class="qty-display" id="qtyDisplay">1</div>
+          <button type="button" class="qty-btn" onclick="changeQty(1)">+</button>
+        </div>
+        <input type="hidden" name="quantity" id="quantityInput" value="1">
+
+        <!-- Quick select -->
+        <div style="display:flex; gap:0.5rem; justify-content:center; margin-bottom:1.5rem; flex-wrap:wrap;">
+          {% for q in quick_quantities %}
+          <button type="button" class="btn btn-outline-gold btn-sm" onclick="setQty({{ q }})">{{ q }} votes</button>
+          {% endfor %}
+        </div>
+
+        <!-- Price Display -->
+        <div class="price-display">
+          <span class="label">Total Amount</span>
+          <span class="amount" id="priceDisplay">₵1.00</span>
+        </div>
+
+        <input type="hidden" name="network_selected" value="mtn">
+
+        <!-- Phone Number -->
+        <div class="form-group">
+          <label class="form-label">Mobile Money Number</label>
+          <input type="tel" name="phone_number" class="form-control"
+                 placeholder="e.g. 0241234567" maxlength="10"
+                 pattern="[0-9]{10}" required id="phoneInput">
+          <small style="color:var(--gray-600); font-size:0.8rem;">Enter the 10-digit number linked to your MoMo wallet</small>
+        </div>
+
+        <!-- Voter Name (optional) -->
+        <div class="form-group">
+          <label class="form-label">Your Name <span style="color:var(--gray-400); font-weight:400;">(optional)</span></label>
+          <input type="text" name="voter_name" class="form-control" placeholder="e.g. Kofi Mensah">
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="btn btn-primary btn-block btn-lg" id="submitBtn" style="margin-top:0.5rem;">
+          🗳 Pay & Vote Now
+        </button>
+
+        <p style="text-align:center; font-size:0.78rem; color:var(--gray-400); margin-top:1rem;">
+          🔒 Secured payment · Votes credited instantly after confirmation
+        </p>
+      </form>
+    </div>
+
+    <!-- Back link -->
+    <div style="text-align:center; margin-top:1.5rem;">
+      <a href="/events/{{ nominee.category.event.slug }}/" style="color:var(--gray-600); font-size:0.88rem;">← Back to {{ nominee.category.event.title }}</a>
+    </div>
+
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/voting.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,192 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}Contact Us — CrownVote{% endblock %}
+
+{% block content %}
+
+<!-- Hero -->
+<div style="background:var(--ash); border-bottom:4px solid var(--gold); padding:4rem 2rem; text-align:center;">
+  <div style="max-width:640px; margin:0 auto;">
+    <div style="font-size:0.78rem; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--gold); margin-bottom:1rem;">Get In Touch</div>
+    <h1 style="color:white; margin-bottom:1rem;">Host Your Awards <span style="color:var(--gold);">with CrownVote</span></h1>
+    <p style="color:var(--gray-400); font-size:1rem; line-height:1.7;">
+      Ready to run a transparent, real-time voting event? Fill out the form below and we'll set everything up for you — from event creation to MoMo payment integration.
+    </p>
+  </div>
+</div>
+
+<!-- Info Cards -->
+<div style="background:var(--gray-100); padding:3rem 2rem;">
+  <div class="container">
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:1.5rem; margin-bottom:4rem;">
+
+      <div style="background:white; border-radius:14px; padding:1.75rem; text-align:center; box-shadow:0 1px 4px rgba(0,0,0,0.07); border-top:4px solid var(--gold);">
+        <div style="font-size:2rem; margin-bottom:0.75rem;">📱</div>
+        <h4 style="margin-bottom:0.4rem;">WhatsApp Us</h4>
+        <a href="https://wa.me/233XXXXXXXXX" target="_blank"
+           style="color:var(--red); font-weight:600; font-size:0.9rem;">+233 50 901 3833</a>
+        <p style="color:var(--gray-600); font-size:0.82rem; margin-top:0.4rem;">Mon – Sat, 8am – 8pm</p>
+      </div>
+
+      <div style="background:white; border-radius:14px; padding:1.75rem; text-align:center; box-shadow:0 1px 4px rgba(0,0,0,0.07); border-top:4px solid var(--red);">
+        <div style="font-size:2rem; margin-bottom:0.75rem;">📧</div>
+        <h4 style="margin-bottom:0.4rem;">Email Us</h4>
+        <a href="mailto:hello@crownvote.gh"
+           style="color:var(--red); font-weight:600; font-size:0.9rem;">crownvote.event@gmail.com</a>
+        <p style="color:var(--gray-600); font-size:0.82rem; margin-top:0.4rem;">We reply within 24 hours</p>
+      </div>
+
+      <div style="background:white; border-radius:14px; padding:1.75rem; text-align:center; box-shadow:0 1px 4px rgba(0,0,0,0.07); border-top:4px solid var(--ash);">
+        <div style="font-size:2rem; margin-bottom:0.75rem;">⚡</div>
+        <h4 style="margin-bottom:0.4rem;">Quick Setup</h4>
+        <p style="color:var(--gray-600); font-size:0.88rem; line-height:1.6;">Your event goes live within <strong>24 hours</strong> of inquiry</p>
+      </div>
+
+      <div style="background:white; border-radius:14px; padding:1.75rem; text-align:center; box-shadow:0 1px 4px rgba(0,0,0,0.07); border-top:4px solid var(--gold);">
+        <div style="font-size:2rem; margin-bottom:0.75rem;">🏆</div>
+        <h4 style="margin-bottom:0.4rem;">What We Handle</h4>
+        <p style="color:var(--gray-600); font-size:0.82rem; line-height:1.6;">Event setup · Categories · Nominees · MoMo payments · Live results</p>
+      </div>
+
+    </div>
+
+    <!-- Main Grid: Form + Sidebar -->
+    <div style="display:grid; grid-template-columns:2fr 1fr; gap:2.5rem; align-items:start;">
+
+      <!-- Contact Form -->
+      <div style="background:white; border-radius:20px; padding:2.5rem; box-shadow:0 2px 12px rgba(0,0,0,0.08);">
+
+        {% if submitted %}
+        <!-- Success State -->
+        <div style="text-align:center; padding:2rem 0;">
+          <div style="font-size:4rem; margin-bottom:1rem;">🎉</div>
+          <h2 style="color:var(--gold); margin-bottom:0.75rem;">Inquiry Received!</h2>
+          <p style="color:var(--ash-light); margin-bottom:1.5rem; line-height:1.7;">
+            Thank you for reaching out! Our team will review your inquiry and get back to you within <strong>24 hours</strong> to set up your event.
+          </p>
+          <div style="background:var(--gray-100); border-radius:12px; padding:1.25rem; text-align:left; margin-bottom:2rem; font-size:0.88rem; border-left:4px solid var(--gold);">
+            <p style="margin-bottom:0.4rem;"><strong>What happens next?</strong></p>
+            <p style="color:var(--gray-600); line-height:1.7;">
+              1. We review your event details<br>
+              2. We create your event and organizer account<br>
+              3. We send you your login credentials via WhatsApp<br>
+              4. You log in and watch the votes come in live 🚀
+            </p>
+          </div>
+          <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
+            <a href="/" class="btn btn-primary">Back to Home</a>
+            <a href="/events/" class="btn btn-outline-gold">View Live Events</a>
+          </div>
+        </div>
+
+        {% else %}
+        <!-- Form -->
+        <h2 style="margin-bottom:0.4rem;">Host an Event</h2>
+        <p style="color:var(--gray-600); font-size:0.9rem; margin-bottom:2rem;">
+          Tell us about your event and we'll get back to you within 24 hours.
+        </p>
+
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-error">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+
+        <form method="post">
+          {% csrf_token %}
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.25rem;">
+            <div class="form-group">
+              <label class="form-label">Your Name <span style="color:var(--red);">*</span></label>
+              <input type="text" name="name" class="form-control" placeholder="e.g. Kofi Mensah" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email Address <span style="color:var(--red);">*</span></label>
+              <input type="email" name="email" class="form-control" placeholder="kofi@example.com" required>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.25rem;">
+            <div class="form-group">
+              <label class="form-label">Phone / WhatsApp</label>
+              <input type="tel" name="phone" class="form-control" placeholder="0241234567">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Organization / School</label>
+              <input type="text" name="organization" class="form-control" placeholder="e.g. GHSS Accra">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Type of Event</label>
+            <select name="event_type" class="form-control">
+              <option value="">— Select event type —</option>
+              <option value="school_awards">School Personality Awards</option>
+              <option value="brand_awards">Brand / Corporate Awards</option>
+              <option value="community">Community Awards</option>
+              <option value="entertainment">Entertainment / Music Awards</option>
+              <option value="church">Church / Religious Awards</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Tell us about your event <span style="color:var(--red);">*</span></label>
+            <textarea name="message" class="form-control" rows="5" required
+              placeholder="e.g. We are organizing our annual Senior High School personality awards with 6 categories and about 30 nominees. We expect 500+ voters..."></textarea>
+          </div>
+
+          <div style="background:rgba(212,175,55,0.08); border:1px solid var(--gold); border-radius:10px; padding:1rem; margin-bottom:1.5rem; font-size:0.83rem; color:var(--ash-light);">
+            ℹ️ After submitting, our team will contact you via WhatsApp or email within 24 hours to confirm your event details and send your organizer login credentials.
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block btn-lg">
+            🚀 Submit Event Inquiry
+          </button>
+        </form>
+        {% endif %}
+
+      </div>
+
+      <!-- Sidebar -->
+      <div style="display:flex; flex-direction:column; gap:1.5rem;">
+
+        <!-- Pricing -->
+        <div style="background:var(--ash); border-radius:16px; padding:1.75rem; border-bottom:4px solid var(--gold);">
+          <h4 style="color:var(--gold); margin-bottom:1.25rem;">💰 How Pricing Works</h4>
+          <div style="color:var(--gray-300); font-size:0.88rem; line-height:1.8;">
+            <div style="display:flex; justify-content:space-between; padding:0.5rem 0; border-bottom:1px solid var(--ash-light);">
+              <span>₵1</span><span style="color:var(--gold); font-weight:700;">= 1 Vote</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding:0.5rem 0; border-bottom:1px solid var(--ash-light);">
+              <span>Minimum votes</span><span style="color:white;">1</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding:0.5rem 0; border-bottom:1px solid var(--ash-light);">
+              <span>Maximum votes</span><span style="color:white;">Unlimited</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding:0.5rem 0;">
+              <span>Payment methods</span><span style="color:white;">MoMo</span>
+            </div>
+          </div>
+          <div style="margin-top:1.25rem; background:rgba(212,175,55,0.1); border-radius:8px; padding:0.85rem; font-size:0.82rem; color:var(--gold); text-align:center;">
+            Revenue goes directly to the event organizer
+          </div>
+        </div>
+
+        <!-- What's Included -->
+        <div style="background:white; border-radius:16px; padding:1.75rem; box-shadow:0 1px 4px rgba(0,0,0,0.07);">
+          <h4 style="margin-bottom:1.25rem; color:var(--ash);">✅ What's Included</h4>
+          {% for item in features %}
+          <div style="display:flex; align-items:flex-start; gap:0.75rem; margin-bottom:0.85rem; font-size:0.88rem; color:var(--ash-light);">
+            <span style="color:var(--gold); flex-shrink:0; margin-top:1px;">♛</span>
+            <span>{{ item }}</span>
+          </div>
+          {% endfor %}
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

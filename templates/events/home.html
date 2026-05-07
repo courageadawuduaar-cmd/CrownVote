@@ -1,0 +1,307 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}CrownVote — Ghana's #1 Personality Awards Voting Platform{% endblock %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="hero" style="padding:0; min-height:100vh; position:relative; display:flex; align-items:center; justify-content:center;">
+
+  <!-- Video Background -->
+  <div style="position:absolute; inset:0; overflow:hidden; z-index:0;">
+    {% for vid in videos %}
+    <video
+      class="hero-video"
+      id="vid-{{ forloop.counter }}"
+      muted
+      playsinline
+      preload="auto"
+      {% if forloop.first %}autoplay{% endif %}
+      style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+             opacity:{% if forloop.first %}1{% else %}0{% endif %};
+             transition:opacity 1.5s ease;">
+      {% if use_static %}
+        <source src="{% static vid %}" type="video/mp4">
+      {% else %}
+        <source src="{{ vid }}" type="video/mp4">
+      {% endif %}
+    </video>
+    {% endfor %}
+
+    <!-- Dark overlay -->
+    <div style="position:absolute; inset:0; background:linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.75) 100%); z-index:1;"></div>
+  </div>
+
+  <!-- Hero Content -->
+  <div class="hero-content" style="position:relative; z-index:2; padding:6rem 2rem 5rem; text-align:center;">
+    <div class="hero-badge" id="heroBadge">{{ site_settings.hero_badge }}</div>
+
+    <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
+      <a href="/events/" class="btn btn-primary btn-lg">View All Events</a>
+      <a href="/results/" class="btn btn-outline-gold btn-lg">Live Results</a>
+    </div>
+
+    <!-- Video indicator dots -->
+    <div id="videoDots" style="display:flex; gap:0.5rem; justify-content:center; margin-top:2rem;">
+      {% for vid in videos %}
+      <div class="vid-dot" id="dot-{{ forloop.counter }}"
+           style="width:{% if forloop.first %}24px{% else %}8px{% endif %}; height:8px; border-radius:100px;
+                  background:{% if forloop.first %}var(--gold){% else %}rgba(255,255,255,0.4){% endif %};
+                  transition:all 0.4s ease; cursor:pointer;"
+           onclick="goToSlide({{ forloop.counter0 }})">
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-title">
+      <h2>How It Works</h2>
+      <div class="underline"></div>
+      <p>Voting is simple, fast and 100% transparent</p>
+    </div>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:2rem; text-align:center;">
+      {% for step in steps %}
+      <div style="background:white; border-radius:16px; padding:2rem 1.5rem; box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+        <div style="font-size:2.5rem; margin-bottom:1rem;">{{ step.icon }}</div>
+        <h4 style="margin-bottom:0.5rem;">{{ step.title }}</h4>
+        <p style="color:var(--gray-600); font-size:0.9rem;">{{ step.desc }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Hero Search -->
+<form method="get" action="/search/"
+      style="margin-top:2rem; display:flex; max-width:500px; margin-left:auto; margin-right:auto; border-radius:12px; overflow:hidden; box-shadow:0 4px 24px rgba(0,0,0,0.4);">
+  <input type="text" name="q" placeholder="Search events, nominees, short codes..."
+         style="flex:1; padding:1rem 1.5rem; border:none; font-size:0.95rem; outline:none; background:rgba(255,255,255,0.95); color:var(--ash); min-width:0;">
+  <button type="submit"
+          style="background:var(--red); color:white; border:none; padding:1rem 1.5rem; font-size:1rem; font-weight:700; cursor:pointer; white-space:nowrap;">
+    🔍 Search
+  </button>
+</form>
+
+<!-- ACTIVE EVENTS -->
+{% if active_events %}
+<section class="section">
+  <div class="container">
+    <div class="section-title">
+      <h2>Active Events</h2>
+      <div class="underline"></div>
+      <p>Voting is open — cast your votes now!</p>
+    </div>
+    <div class="events-grid">
+      {% for event in active_events %}
+      <a href="/events/{{ event.slug }}/" class="event-card">
+        <div class="event-card-banner">
+          {% if event.banner %}
+            <img src="{{ event.banner.url }}" alt="{{ event.title }}">
+          {% endif %}
+          <span class="event-status-badge status-active">● Live</span>
+        </div>
+        <div class="event-card-body">
+          <h3>{{ event.title }}</h3>
+          <p>{{ event.description|truncatewords:18 }}</p>
+          <div class="event-meta">
+            <span>📅 Ends {{ event.end_date|date:"M d, Y" }}</span>
+            <span>🗳 {{ event.total_votes }} votes</span>
+          </div>
+          <span class="btn btn-primary btn-sm btn-block">Vote Now</span>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ALL EVENTS -->
+{% if all_events %}
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-title">
+      <h2>All Events</h2>
+      <div class="underline"></div>
+    </div>
+    <div class="events-grid">
+      {% for event in all_events %}
+      <a href="/events/{{ event.slug }}/" class="event-card">
+        <div class="event-card-banner">
+          {% if event.banner %}
+            <img src="{{ event.banner.url }}" alt="{{ event.title }}">
+          {% endif %}
+          <span class="event-status-badge status-{{ event.status }}">{{ event.get_status_display }}</span>
+        </div>
+        <div class="event-card-body">
+          <h3>{{ event.title }}</h3>
+          <p>{{ event.description|truncatewords:18 }}</p>
+          <div class="event-meta">
+            <span>📅 {{ event.start_date|date:"M d" }} – {{ event.end_date|date:"M d, Y" }}</span>
+            <span>🗳 {{ event.total_votes }} votes</span>
+          </div>
+          <span class="btn btn-outline-gold btn-sm btn-block">View Event</span>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- PRICING CALLOUT -->
+<section class="section" style="background:linear-gradient(135deg, var(--ash) 0%, var(--ash-light) 100%); color:white;">
+  <div class="container" style="text-align:center; max-width:640px;">
+    <h2 style="color:var(--gold); margin-bottom:1rem;">₵1 = 1 Vote</h2>
+    <p style="color:var(--gray-200); margin-bottom:2rem; font-size:1.05rem;">
+      Simple, transparent pricing. Pay via MTN MoMo, Telecel Cash or AirtelTigo Money. Votes are credited instantly after payment.
+    </p>
+    <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
+      <div style="background:rgba(255,255,255,0.08); border:1px solid var(--gold); border-radius:12px; padding:1rem 2rem;">
+        <div style="font-size:1.5rem; font-weight:800; color:var(--gold);">MTN MoMo</div>
+        <div style="font-size:0.85rem; color:var(--gray-400);">Instant</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.08); border:1px solid var(--gold); border-radius:12px; padding:1rem 2rem;">
+        <div style="font-size:1.5rem; font-weight:800; color:var(--gold);">Telecel</div>
+        <div style="font-size:0.85rem; color:var(--gray-400);">Instant</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.08); border:1px solid var(--gold); border-radius:12px; padding:1rem 2rem;">
+        <div style="font-size:1.5rem; font-weight:800; color:var(--gold);">AirtelTigo</div>
+        <div style="font-size:0.85rem; color:var(--gray-400);">Instant</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const slides    = {{ slides_json|safe }};
+const totalVids = {{ videos|length }};
+let   current   = 0;
+let   timer     = null;
+
+const heading = document.getElementById('heroHeading');
+const subtext = document.getElementById('heroSubtext');
+
+// Set initial text from slide 0
+heading.textContent  = slides[0].heading;
+subtext.textContent  = slides[0].subtext;
+// Small delay so the fade-in is visible on first load
+setTimeout(() => {
+  heading.style.opacity   = '1';
+  heading.style.transform = 'translateY(0)';
+  subtext.style.opacity   = '1';
+  subtext.style.transform = 'translateY(0)';
+}, 100);
+
+function animateText(index) {
+  // Step 1: fade out
+  heading.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+  subtext.style.transition  = 'opacity 0.5s ease, transform 0.5s ease';
+  heading.style.opacity     = '0';
+  heading.style.transform   = 'translateY(-12px)';
+  subtext.style.opacity     = '0';
+  subtext.style.transform   = 'translateY(-12px)';
+
+  setTimeout(() => {
+    // Step 2: swap text while invisible
+    heading.textContent     = slides[index].heading;
+    subtext.textContent     = slides[index].subtext;
+
+    // Step 3: reset position below
+    heading.style.transition = 'none';
+    subtext.style.transition  = 'none';
+    heading.style.transform   = 'translateY(12px)';
+    subtext.style.transform   = 'translateY(12px)';
+
+    // Force reflow so transition fires
+    void heading.offsetWidth;
+    void subtext.offsetWidth;
+
+    // Step 4: fade in from below
+    heading.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    subtext.style.transition  = 'opacity 0.6s ease, transform 0.6s ease';
+    heading.style.opacity     = '1';
+    heading.style.transform   = 'translateY(0)';
+    subtext.style.opacity     = '1';
+    subtext.style.transform   = 'translateY(0)';
+  }, 500);
+}
+
+function updateDots(index) {
+  document.querySelectorAll('.vid-dot').forEach((dot, i) => {
+    dot.style.width      = i === index ? '24px' : '8px';
+    dot.style.background = i === index ? 'var(--gold)' : 'rgba(255,255,255,0.4)';
+  });
+}
+
+function goToSlide(index) {
+  if (index === current) return;
+
+  // Fade out current video
+  const oldVid = document.getElementById(`vid-${current + 1}`);
+  if (oldVid) oldVid.style.opacity = '0';
+
+  current = index;
+
+  // Fade in new video
+  const newVid = document.getElementById(`vid-${current + 1}`);
+  if (newVid) {
+    newVid.style.opacity = '1';
+    newVid.currentTime   = 0;
+    newVid.play().catch(() => {});
+  }
+
+  // Sync text with video
+  animateText(current);
+  updateDots(current);
+
+  // Reset timer
+  clearTimeout(timer);
+  startTimer();
+}
+
+function nextSlide() {
+  goToSlide((current + 1) % totalVids);
+}
+
+function startTimer() {
+  // Use actual video duration, fall back to 8s
+  const vid      = document.getElementById(`vid-${current + 1}`);
+  const duration = (vid && vid.duration && !isNaN(vid.duration) && vid.duration > 0)
+                    ? (vid.duration * 1000)
+                    : 8000;
+  timer = setTimeout(nextSlide, duration);
+}
+
+// Auto-advance on video end
+document.querySelectorAll('.hero-video').forEach((vid, i) => {
+  vid.addEventListener('ended', () => {
+    clearTimeout(timer);
+    nextSlide();
+  });
+
+  vid.addEventListener('loadedmetadata', () => {
+    if (i === current) {
+      clearTimeout(timer);
+      startTimer();
+    }
+  });
+});
+
+// Play first video
+const firstVid = document.getElementById('vid-1');
+if (firstVid) firstVid.play().catch(() => {});
+
+// Start
+startTimer();
+</script>
+{% endblock %}

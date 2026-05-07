@@ -1,0 +1,170 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}
+  {% if query %}Search "{{ query }}"{% else %}Search{% endif %} — CrownVote
+{% endblock %}
+
+{% block content %}
+
+<!-- Search Header -->
+<div style="background:var(--ash); border-bottom:4px solid var(--gold); padding:3rem 2rem;">
+  <div class="container" style="max-width:720px;">
+    <h2 style="color:white; margin-bottom:1.5rem; text-align:center;">
+      🔍 Search CrownVote
+    </h2>
+    <form method="get" action="/search/">
+      <div style="display:flex; gap:0; border-radius:12px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+        <input
+          type="text"
+          name="q"
+          value="{{ query }}"
+          placeholder="Search events, nominees, categories..."
+          autofocus
+          style="flex:1; padding:1rem 1.5rem; border:none; font-size:1rem; outline:none; background:white; color:var(--ash);">
+        <button type="submit"
+          style="background:var(--red); color:white; border:none; padding:1rem 2rem; font-size:1rem; font-weight:700; cursor:pointer; transition:all 0.2s; white-space:nowrap;">
+          Search
+        </button>
+      </div>
+    </form>
+
+    {% if query %}
+    <p style="color:var(--gray-400); text-align:center; margin-top:1rem; font-size:0.9rem;">
+      {% if total_results %}
+        Found <strong style="color:var(--gold);">{{ total_results }}</strong> result{{ total_results|pluralize }} for "<strong style="color:white;">{{ query }}</strong>"
+      {% else %}
+        No results found for "<strong style="color:white;">{{ query }}</strong>"
+      {% endif %}
+    </p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Results -->
+{% if query %}
+<section class="section" style="padding-top:2.5rem;">
+  <div class="container">
+
+    {% if not total_results %}
+    <!-- No Results -->
+    <div style="text-align:center; padding:4rem 2rem;">
+      <div style="font-size:4rem; margin-bottom:1rem;">🔍</div>
+      <h3 style="margin-bottom:0.75rem;">No results found</h3>
+      <p style="color:var(--gray-600); margin-bottom:2rem;">
+        Try searching with different keywords or browse all events below.
+      </p>
+      <a href="/events/" class="btn btn-primary">Browse All Events</a>
+    </div>
+
+    {% else %}
+
+    <!-- Events Results -->
+    {% if events %}
+    <div style="margin-bottom:3rem;">
+      <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1.5rem;">
+        <h3 style="margin:0;">🎉 Events</h3>
+        <span style="background:var(--red); color:white; font-size:0.75rem; font-weight:700; padding:0.2rem 0.6rem; border-radius:100px;">{{ events.count }}</span>
+      </div>
+      <div class="events-grid">
+        {% for event in events %}
+        <a href="/events/{{ event.slug }}/" class="event-card">
+          <div class="event-card-banner">
+            {% if event.banner %}
+              <img src="{{ event.banner.url }}" alt="{{ event.title }}">
+            {% endif %}
+            <span class="event-status-badge status-{{ event.status }}">{{ event.get_status_display }}</span>
+          </div>
+          <div class="event-card-body">
+            <h3>{{ event.title }}</h3>
+            <p>{{ event.description|truncatewords:15 }}</p>
+            <div class="event-meta">
+              <span>📅 {{ event.end_date|date:"M d, Y" }}</span>
+              <span>🗳 {{ event.total_votes }} votes</span>
+            </div>
+            <span class="btn btn-primary btn-sm btn-block">View Event</span>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Categories Results -->
+    {% if categories %}
+    <div style="margin-bottom:3rem;">
+      <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1.5rem;">
+        <h3 style="margin:0;">🏷️ Categories</h3>
+        <span style="background:var(--gold); color:var(--ash); font-size:0.75rem; font-weight:700; padding:0.2rem 0.6rem; border-radius:100px;">{{ categories.count }}</span>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:1rem;">
+        {% for category in categories %}
+        <a href="/events/{{ category.event.slug }}/"
+           style="background:white; border-radius:12px; padding:1.25rem 1.5rem; border:1px solid var(--gray-200); display:flex; justify-content:space-between; align-items:center; text-decoration:none; color:inherit; transition:all 0.2s; box-shadow:0 1px 4px rgba(0,0,0,0.06);"
+           onmouseover="this.style.borderColor='var(--gold)'; this.style.transform='translateY(-2px)'"
+           onmouseout="this.style.borderColor='var(--gray-200)'; this.style.transform='none'">
+          <div>
+            <div style="font-weight:700; margin-bottom:0.25rem;">{{ category.name }}</div>
+            <div style="font-size:0.82rem; color:var(--gray-600);">{{ category.event.title }}</div>
+          </div>
+          <div style="text-align:right; flex-shrink:0;">
+            <div style="font-weight:700; color:var(--red);">{{ category.total_votes }}</div>
+            <div style="font-size:0.75rem; color:var(--gray-400);">votes</div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Nominees Results -->
+    {% if nominees %}
+    <div style="margin-bottom:3rem;">
+      <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1.5rem;">
+        <h3 style="margin:0;">👤 Nominees</h3>
+        <span style="background:var(--ash); color:white; font-size:0.75rem; font-weight:700; padding:0.2rem 0.6rem; border-radius:100px;">{{ nominees.count }}</span>
+      </div>
+      <div class="nominees-grid">
+        {% for nominee in nominees %}
+        <a href="/voting/campaign/{{ nominee.slug }}-{{ nominee.id }}/"
+           style="text-decoration:none; color:inherit;">
+          <div class="nominee-card {% if nominee.is_featured %}featured{% endif %}">
+            <div class="nominee-photo">
+              {% if nominee.photo %}
+                <img src="{{ nominee.photo.url }}" alt="{{ nominee.name }}">
+              {% else %}
+                <div class="nominee-photo-placeholder">♛</div>
+              {% endif %}
+            </div>
+            <div class="nominee-info" style="text-align:center;">
+              <h4>{{ nominee.name }}</h4>
+              <span class="short-code-badge">{{ nominee.short_code }}</span>
+              <p class="bio" style="margin-top:0.5rem;">{{ nominee.category.name }}</p>
+              <p style="font-size:0.8rem; color:var(--gray-400);">{{ nominee.category.event.title }}</p>
+              <div class="vote-bar-wrap" style="margin-top:0.75rem;">
+                <div class="vote-bar-header">
+                  <span>{{ nominee.total_votes }} votes</span>
+                  <span>{{ nominee.vote_percentage }}%</span>
+                </div>
+                <div class="vote-bar-track">
+                  <div class="vote-bar-fill" style="width:{{ nominee.vote_percentage }}%;"></div>
+                </div>
+              </div>
+              <a href="/voting/{{ nominee.id }}/vote/"
+                 class="btn btn-primary btn-sm btn-block"
+                 style="margin-top:1rem;">
+                🗳 Vote Now
+              </a>
+            </div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% endif %}
+  </div>
+</section>
+{% endif %}
+
+{% endblock %}

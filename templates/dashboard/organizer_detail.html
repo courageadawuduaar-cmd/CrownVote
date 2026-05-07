@@ -1,0 +1,148 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}{{ organizer.get_full_name|default:organizer.username }} — Organizer Detail{% endblock %}
+
+{% block content %}
+<div style="display:flex; min-height:calc(100vh - 68px);">
+
+  <!-- Sidebar -->
+  <aside style="width:240px; background:var(--ash); border-right:1px solid var(--ash-light); padding:2rem 0; flex-shrink:0; position:sticky; top:68px; height:calc(100vh - 68px); overflow-y:auto;">
+    <div style="padding:0 1.5rem; margin-bottom:2rem;">
+      <div style="font-size:0.75rem; color:var(--gray-400); text-transform:uppercase; letter-spacing:0.1em; font-weight:600;">Management</div>
+    </div>
+    {% for item in nav_items %}
+    <a href="{{ item.url }}"
+       style="display:flex; align-items:center; gap:0.75rem; padding:0.75rem 1.5rem; color:var(--gray-400); font-size:0.9rem; font-weight:500; transition:all 0.2s; border-left:3px solid transparent;"
+       onmouseover="this.style.color='var(--gold)';this.style.borderColor='var(--gold)';this.style.background='rgba(255,255,255,0.04)'"
+       onmouseout="this.style.color='var(--gray-400)';this.style.borderColor='transparent';this.style.background='none'">
+      <span style="font-size:1.1rem;">{{ item.icon }}</span> {{ item.label }}
+    </a>
+    {% endfor %}
+    <div style="margin-top:2rem; padding:0 1.5rem;">
+      <div style="border-top:1px solid var(--ash-light); padding-top:1.5rem;">
+        <a href="/admin/" style="display:flex; align-items:center; gap:0.75rem; color:var(--gray-400); font-size:0.9rem;">
+          <span>⚙️</span> Django Admin
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main style="flex:1; padding:2.5rem; overflow-x:hidden;">
+
+    <!-- Back + Header -->
+    <div style="margin-bottom:2rem;">
+      <a href="/dashboard/organizers/" style="color:var(--gray-400); font-size:0.85rem;">← Back to Organizers</a>
+      <h1 style="margin-top:0.75rem; margin-bottom:0.25rem;">
+        {{ organizer.get_full_name|default:organizer.username }}
+      </h1>
+      <p style="color:var(--gray-600);">{{ organizer.email }} · @{{ organizer.username }}</p>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="stats-grid" style="margin-bottom:2.5rem;">
+      <div class="stat-card">
+        <div class="stat-value">{{ total_votes }}</div>
+        <div class="stat-label">Total Votes</div>
+      </div>
+      <div class="stat-card" style="border-color:var(--gold);">
+        <div class="stat-value" style="color:var(--gold);">₵{{ total_gross }}</div>
+        <div class="stat-label">Gross Revenue</div>
+      </div>
+      <div class="stat-card" style="border-color:green;">
+        <div class="stat-value" style="color:green;">₵{{ total_net }}</div>
+        <div class="stat-label">Net Earnings</div>
+      </div>
+      <div class="stat-card" style="border-color:var(--ash);">
+        <div class="stat-value" style="color:var(--ash);">{{ event_data|length }}</div>
+        <div class="stat-label">Events</div>
+      </div>
+    </div>
+
+    <!-- Per Event Breakdown -->
+    {% for ed in event_data %}
+    <div style="background:white; border-radius:16px; padding:1.75rem; box-shadow:0 1px 4px rgba(0,0,0,0.08); margin-bottom:2rem;">
+
+      <!-- Event Header -->
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem; margin-bottom:1.5rem; padding-bottom:1rem; border-bottom:2px solid var(--gray-100);">
+        <div>
+          <h3 style="margin-bottom:0.3rem;">{{ ed.event.title }}</h3>
+          <span class="event-status-badge status-{{ ed.event.status }}" style="position:static; display:inline-block;">
+            {{ ed.event.get_status_display }}
+          </span>
+          <span style="color:var(--gray-400); font-size:0.82rem; margin-left:0.75rem;">
+            {{ ed.event.start_date|date:"M d, Y" }} — {{ ed.event.end_date|date:"M d, Y" }}
+          </span>
+        </div>
+        <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+          <a href="/results/{{ ed.event.slug }}/" class="btn btn-sm btn-outline-gold" target="_blank">📊 Results</a>
+          <a href="/dashboard/report/{{ ed.event.slug }}/" class="btn btn-sm btn-gold">📄 Report</a>
+        </div>
+      </div>
+
+      <!-- Financial Cards -->
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:1.5rem;">
+        <div style="background:var(--gray-100); border-radius:12px; padding:1rem; text-align:center;">
+          <div style="font-size:1.4rem; font-weight:800; color:var(--ash);">{{ ed.total_votes }}</div>
+          <div style="font-size:0.78rem; color:var(--gray-600); margin-top:0.2rem;">Votes</div>
+        </div>
+        <div style="background:var(--gray-100); border-radius:12px; padding:1rem; text-align:center;">
+          <div style="font-size:1.4rem; font-weight:800; color:var(--gold);">₵{{ ed.total_revenue }}</div>
+          <div style="font-size:0.78rem; color:var(--gray-600); margin-top:0.2rem;">Gross Revenue</div>
+        </div>
+        <div style="background:#fff5f5; border-radius:12px; padding:1rem; text-align:center;">
+          <div style="font-size:1.4rem; font-weight:800; color:var(--red);">₵{{ ed.commission_amount }}</div>
+          <div style="font-size:0.78rem; color:var(--gray-600); margin-top:0.2rem;">Commission ({{ ed.commission_rate }}%)</div>
+        </div>
+        <div style="background:#f0fff4; border-radius:12px; padding:1rem; text-align:center;">
+          <div style="font-size:1.4rem; font-weight:800; color:green;">₵{{ ed.net_revenue }}</div>
+          <div style="font-size:0.78rem; color:var(--gray-600); margin-top:0.2rem;">Net Earnings</div>
+        </div>
+      </div>
+
+      <!-- Category Votes -->
+      <h4 style="margin-bottom:1rem; color:var(--gray-600); font-size:0.88rem; text-transform:uppercase; letter-spacing:0.05em;">Category Breakdown</h4>
+      {% for cat in ed.categories %}
+      <div style="margin-bottom:0.75rem;">
+        <div style="display:flex; justify-content:space-between; font-size:0.88rem; margin-bottom:0.3rem;">
+          <span>{{ cat.name }}</span>
+          <span style="color:var(--gray-600);">{{ cat.total_votes }} votes</span>
+        </div>
+        <div class="vote-bar-track">
+          {% if ed.total_votes > 0 %}
+            {% widthratio cat.total_votes ed.total_votes 100 as pct %}
+            <div class="vote-bar-fill" style="width:{{ pct }}%;"></div>
+          {% else %}
+            <div class="vote-bar-fill" style="width:0%;"></div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+
+      <!-- Recent Transactions -->
+      {% if ed.recent_transactions %}
+      <h4 style="margin-top:1.5rem; margin-bottom:1rem; color:var(--gray-600); font-size:0.88rem; text-transform:uppercase; letter-spacing:0.05em;">Recent Payments</h4>
+      {% for tx in ed.recent_transactions %}
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:0.6rem 0; border-bottom:1px solid var(--gray-100); font-size:0.85rem;">
+        <div>
+          <div style="font-weight:600;">{{ tx.nominee.name }}</div>
+          <div style="color:var(--gray-400); font-size:0.78rem;">{{ tx.phone_number }} · {{ tx.get_network_display }} · {{ tx.created_at|date:"M d, g:i A" }}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-weight:700; color:var(--red);">₵{{ tx.amount }}</div>
+          <div style="font-size:0.75rem; color:green;">{{ tx.vote_quantity }} votes</div>
+        </div>
+      </div>
+      {% endfor %}
+      {% endif %}
+
+    </div>
+    {% empty %}
+    <div style="background:white; border-radius:16px; padding:3rem; text-align:center; color:var(--gray-400);">
+      No events assigned to this organizer yet.
+    </div>
+    {% endfor %}
+
+  </main>
+</div>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends 'base/base.html' %}
+{% block title %}Organizer Login — CrownVote{% endblock %}
+
+{% block content %}
+<section style="min-height:80vh; display:flex; align-items:center; justify-content:center; padding:3rem 1.5rem; background:var(--gray-100);">
+  <div style="width:100%; max-width:400px;">
+
+    <!-- Logo -->
+    <div style="text-align:center; margin-bottom:2rem;">
+      <a href="/" style="font-size:2rem; font-weight:800; color:var(--ash);">
+        <span style="color:var(--gold);">♛</span> Crown<span style="color:var(--red);">Vote</span>
+      </a>
+      <p style="color:var(--gray-600); margin-top:0.4rem; font-size:0.9rem;">Organizer Portal</p>
+    </div>
+
+    <div class="vote-panel" style="padding:2.5rem;">
+      <h2 style="text-align:center; margin-bottom:0.35rem;">Welcome Back</h2>
+      <p style="text-align:center; color:var(--gray-600); font-size:0.88rem; margin-bottom:2rem;">
+        Sign in to manage your events and view results
+      </p>
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+
+      <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input type="text" name="username" class="form-control"
+                 placeholder="Enter your username" required autofocus>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" name="password" class="form-control"
+                 placeholder="Enter your password" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top:1.25rem;">
+          Sign In to Dashboard
+        </button>
+      </form>
+
+      <div style="text-align:center; margin-top:1.5rem; padding-top:1.5rem; border-top:1px solid var(--gray-200);">
+        <a href="/" style="color:var(--gray-600); font-size:0.85rem;">← Back to CrownVote</a>
+      </div>
+    </div>
+
+    <p style="text-align:center; margin-top:1.25rem; font-size:0.78rem; color:var(--gray-400);">
+      🔒 Staff access only · Secured by CrownVote
+    </p>
+  </div>
+</section>
+{% endblock %}

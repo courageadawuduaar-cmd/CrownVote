@@ -1,0 +1,44 @@
+{% load static %}
+<footer class="footer" style="position:relative; overflow:hidden;">
+
+  <!-- Animated logo watermark -->
+  <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; z-index:0; opacity:0.04;">
+    <img src="{% static 'images/crownvote.png' %}"
+         alt=""
+         style="width:420px; height:420px; object-fit:contain;
+                animation: rotateLogo 30s linear infinite;">
+  </div>
+
+  <style>
+    @keyframes rotateLogo {
+      0%   { transform: rotate(0deg)   scale(1);    }
+      50%  { transform: rotate(180deg) scale(1.08); }
+      100% { transform: rotate(360deg) scale(1);    }
+    }
+  </style>
+
+  <div style="position:relative; z-index:1;">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <h3> Crown<span>Vote</span></h3>
+        <p>Ghana's most transparent personality awards voting platform. Real-time results. Instant MoMo payments. Built for schools, brands & communities.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Platform</h4>
+        <a href="/events/">All Events</a>
+        <a href="/results/">Live Results</a>
+        <a href="/accounts/contact/">Host an Event</a>
+      </div>
+      <div class="footer-col">
+        <h4>Support</h4>
+        <a href="/accounts/contact/">Contact Us</a>
+        <a href="/accounts/login/">Organizer Login</a>
+        <a href="/dashboard/">Dashboard</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 <span>CrownVote</span>. Built and Secured by 3-24 Services. All rights reserved.</p>
+    </div>
+  </div>
+
+</footer>

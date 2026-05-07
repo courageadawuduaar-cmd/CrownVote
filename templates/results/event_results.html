@@ -1,0 +1,200 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}Live Results — {{ event.title }} — CrownVote{% endblock %}
+
+{% block content %}
+
+<!-- Results Header -->
+<div style="background:var(--ash); padding:2.5rem 2rem; border-bottom:4px solid var(--gold);">
+  <div class="container">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem;">
+      <div>
+        <div class="live-indicator" style="margin-bottom:0.75rem;">
+          <span class="live-dot"></span> Live Results
+        </div>
+        <h1 style="color:white; margin-bottom:0.4rem;">{{ event.title }}</h1>
+        <p style="color:var(--gray-400); font-size:0.9rem;">Results update automatically every 10 seconds</p>
+      </div>
+      <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+        <div style="background:rgba(255,255,255,0.07); border:1px solid var(--gold); border-radius:12px; padding:1rem 1.5rem; text-align:center;">
+          <div style="font-size:1.8rem; font-weight:800; color:var(--gold);" id="totalVotes">{{ event.total_votes }}</div>
+          <div style="font-size:0.78rem; color:var(--gray-400); margin-top:0.2rem;">Total Votes</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Category Tabs -->
+<div style="background:var(--ash-light); border-bottom:1px solid rgba(255,255,255,0.08); overflow-x:auto;">
+  <div class="container" style="display:flex; gap:0; padding:0;">
+    {% for category in categories %}
+    <button
+      class="cat-tab"
+      onclick="showCategory('cat-{{ category.id }}')"
+      id="tab-cat-{{ category.id }}"
+      style="padding:1rem 1.5rem; background:none; border:none; color:var(--gray-400); font-size:0.9rem; font-weight:600; cursor:pointer; border-bottom:3px solid transparent; white-space:nowrap; transition:all 0.2s;">
+      {{ category.name }}
+    </button>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Results Body -->
+<section class="section" style="padding-top:2.5rem;">
+  <div class="container" id="resultsContainer">
+
+    {% for category in categories %}
+    <div class="cat-panel" id="cat-{{ category.id }}" style="display:none;">
+
+      <!-- Category Stats -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem; flex-wrap:wrap; gap:1rem;">
+        <div>
+          <h2 style="margin-bottom:0.25rem;">{{ category.name }}</h2>
+          <p style="color:var(--gray-600); font-size:0.9rem;">
+            <span class="cat-total-votes" data-cat="{{ category.id }}">{{ category.total_votes }}</span> total votes in this category
+          </p>
+        </div>
+        {% if event.is_active %}
+        <a href="/events/{{ event.slug }}/" class="btn btn-primary btn-sm">🗳 Cast Votes</a>
+        {% endif %}
+      </div>
+
+      <!-- Leaderboard -->
+      <div class="leaderboard" id="leaderboard-{{ category.id }}">
+        {% for nominee in category.nominees.all %}
+        {% if nominee.is_active %}
+        {% with forloop.counter as rank %}
+        <div class="result-row" id="nominee-{{ nominee.id }}"
+             style="display:flex; align-items:center; gap:1.25rem; background:white; padding:1.25rem 1.5rem;
+                    border-radius:14px; margin-bottom:1rem; box-shadow:0 1px 4px rgba(0,0,0,0.08);
+                    border-left:4px solid {% if rank == 1 %}var(--gold){% elif rank == 2 %}#C0C0C0{% elif rank == 3 %}#CD7F32{% else %}var(--gray-200){% endif %};">
+
+          <!-- Rank -->
+          <div style="width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.9rem; flex-shrink:0;
+                      background:{% if rank == 1 %}var(--gold){% elif rank == 2 %}#C0C0C0{% elif rank == 3 %}#CD7F32{% else %}var(--gray-100){% endif %};
+                      color:{% if rank <= 3 %}var(--ash){% else %}var(--gray-600){% endif %};">
+            {{ rank }}
+          </div>
+
+          <!-- Photo -->
+          <div style="width:56px; height:56px; border-radius:50%; overflow:hidden; flex-shrink:0; background:var(--gray-100); display:flex; align-items:center; justify-content:center; font-size:1.4rem; color:var(--gold);">
+            {% if nominee.photo %}
+              <img src="{{ nominee.photo.url }}" alt="{{ nominee.name }}" style="width:100%;height:100%;object-fit:cover;">
+            {% else %}♛{% endif %}
+          </div>
+
+          <!-- Name + Bar -->
+          <div style="flex:1; min-width:0;">
+            <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:0.4rem; gap:0.5rem; flex-wrap:wrap;">
+              <strong style="font-size:1rem;">{{ nominee.name }}</strong>
+              <span style="font-size:0.82rem; color:var(--gray-600); white-space:nowrap;" class="nominee-votes" data-id="{{ nominee.id }}">
+                {{ nominee.total_votes }} votes
+              </span>
+            </div>
+            <div class="vote-bar-track">
+              <div class="vote-bar-fill nominee-bar" data-id="{{ nominee.id }}"
+                   style="width:{{ nominee.vote_percentage }}%;"></div>
+            </div>
+          </div>
+
+          <!-- Percentage -->
+          <div style="font-size:1.4rem; font-weight:800; color:var(--red); min-width:56px; text-align:right;"
+               class="nominee-pct" data-id="{{ nominee.id }}">
+            {{ nominee.vote_percentage }}%
+          </div>
+
+          <!-- Vote button -->
+          {% if event.is_active %}
+          <a href="/voting/{{ nominee.id }}/vote/" class="btn btn-gold btn-sm" style="flex-shrink:0;">Vote</a>
+          {% endif %}
+
+        </div>
+        {% endwith %}
+        {% endif %}
+        {% endfor %}
+      </div>
+
+    </div>
+    {% endfor %}
+
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const EVENT_SLUG = "{{ event.slug }}";
+const API_URL    = `/results/${EVENT_SLUG}/api/`;
+let   activeTab  = null;
+
+// Show category panel
+function showCategory(id) {
+  document.querySelectorAll('.cat-panel').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('.cat-tab').forEach(t => {
+    t.style.color       = 'var(--gray-400)';
+    t.style.borderColor = 'transparent';
+  });
+  const panel = document.getElementById(id);
+  const tab   = document.getElementById('tab-' + id);
+  if (panel) panel.style.display = 'block';
+  if (tab) {
+    tab.style.color       = 'var(--gold)';
+    tab.style.borderColor = 'var(--gold)';
+  }
+  activeTab = id;
+}
+
+// Show first tab on load
+document.addEventListener('DOMContentLoaded', function () {
+  const firstTab = document.querySelector('.cat-tab');
+  if (firstTab) {
+    const id = firstTab.id.replace('tab-', '');
+    showCategory(id);
+  }
+});
+
+// Live refresh every 10 seconds
+function refreshResults() {
+  fetch(API_URL)
+    .then(r => r.json())
+    .then(data => {
+      // Update global stats
+      document.getElementById('totalVotes').textContent   = data.total_votes;
+
+      // Update each nominee
+      data.categories.forEach(cat => {
+        const catVotesEl = document.querySelector(`.cat-total-votes[data-cat="${cat.id}"]`);
+        if (catVotesEl) catVotesEl.textContent = cat.total_votes;
+
+        cat.nominees.forEach(n => {
+          const votesEl = document.querySelector(`.nominee-votes[data-id="${n.id}"]`);
+          const barEl   = document.querySelector(`.nominee-bar[data-id="${n.id}"]`);
+          const pctEl   = document.querySelector(`.nominee-pct[data-id="${n.id}"]`);
+          if (votesEl) votesEl.textContent    = n.votes + ' votes';
+          if (barEl)   barEl.style.width      = n.percentage + '%';
+          if (pctEl)   pctEl.textContent      = n.percentage + '%';
+        });
+
+        // Re-sort leaderboard rows by votes
+        const board = document.getElementById('leaderboard-' + cat.id);
+        if (board) {
+          const rows = Array.from(board.querySelectorAll('.result-row'));
+          rows.sort((a, b) => {
+            const aId    = a.id.replace('nominee-', '');
+            const bId    = b.id.replace('nominee-', '');
+            const aNom   = cat.nominees.find(n => n.id == aId);
+            const bNom   = cat.nominees.find(n => n.id == bId);
+            return (bNom ? bNom.votes : 0) - (aNom ? aNom.votes : 0);
+          });
+          rows.forEach(r => board.appendChild(r));
+        }
+      });
+    })
+    .catch(err => console.log('Results refresh error:', err));
+}
+
+setInterval(refreshResults, 10000);
+</script>
+{% endblock %}

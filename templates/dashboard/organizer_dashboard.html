@@ -1,0 +1,225 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}Organizer Dashboard — CrownVote{% endblock %}
+
+{% block content %}
+<div style="min-height:calc(100vh - 68px); background:var(--gray-100);">
+
+  <!-- Header -->
+  <div style="background:var(--ash); border-bottom:4px solid var(--gold); padding:2rem;">
+    <div class="container">
+      <p style="color:var(--gold); font-size:0.8rem; font-weight:600; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.4rem;">
+        Organizer Dashboard
+      </p>
+      <h1 style="color:white; margin-bottom:0.3rem;">My Events</h1>
+      <p style="color:var(--gray-400); font-size:0.85rem;">
+        {{ event_data|length }} event{{ event_data|length|pluralize }} assigned to your account
+      </p>
+    </div>
+  </div>
+
+  <div class="container" style="padding:2.5rem 1.5rem;">
+
+    <!-- Grand Summary Stats (only show if multiple events) -->
+    {% if multiple_events %}
+    <div style="background:var(--ash); border-radius:16px; padding:1.5rem 2rem; margin-bottom:2rem; border-left:4px solid var(--gold);">
+      <h3 style="color:var(--gold); margin-bottom:1.25rem; font-size:1rem; text-transform:uppercase; letter-spacing:0.05em;">
+        Overall Summary — All Events
+      </h3>
+      <div class="stats-grid">
+        <div class="stat-card" style="background:rgba(255,255,255,0.06); border-color:white;">
+          <div class="stat-value" style="color:white;">{{ grand_total_votes }}</div>
+          <div class="stat-label" style="color:var(--gray-400);">Total Votes</div>
+        </div>
+        <div class="stat-card" style="background:rgba(255,255,255,0.06); border-color:var(--gold);">
+          <div class="stat-value" style="color:var(--gold);">₵{{ grand_total_revenue }}</div>
+          <div class="stat-label" style="color:var(--gray-400);">Gross Revenue</div>
+        </div>
+        <div class="stat-card" style="background:rgba(255,255,255,0.06); border-color:var(--red);">
+          <div class="stat-value" style="color:var(--red);">₵{{ grand_commission }}</div>
+          <div class="stat-label" style="color:var(--gray-400);">Total Commission</div>
+        </div>
+        <div class="stat-card" style="background:rgba(255,255,255,0.06); border-color:green;">
+          <div class="stat-value" style="color:green;">₵{{ grand_net }}</div>
+          <div class="stat-label" style="color:var(--gray-400);">Total Net Earnings</div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Per Event Cards -->
+    {% for ed in event_data %}
+    <div style="background:white; border-radius:20px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,0.08); margin-bottom:2.5rem; border-top:4px solid var(--gold);">
+
+      <!-- Event Header -->
+      <div style="background:var(--ash); padding:1.5rem 2rem;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem;">
+          <div>
+            <h2 style="color:white; margin-bottom:0.4rem; font-size:1.3rem;">{{ ed.event.title }}</h2>
+            <div style="display:flex; gap:1rem; flex-wrap:wrap; align-items:center;">
+              <span style="color:var(--gray-400); font-size:0.85rem;">
+                📅 {{ ed.event.start_date|date:"M d" }} – {{ ed.event.end_date|date:"M d, Y" }}
+              </span>
+              <span class="event-status-badge status-{{ ed.event.status }}" style="position:static; display:inline-block;">
+                {{ ed.event.get_status_display }}
+              </span>
+            </div>
+          </div>
+          <div style="display:flex; gap:0.6rem; flex-wrap:wrap;">
+            <a href="/results/{{ ed.event.slug }}/" class="btn btn-gold btn-sm" target="_blank">📊 Results</a>
+            <a href="/dashboard/report/{{ ed.event.slug }}/" class="btn btn-outline btn-sm">📄 Report</a>
+            <a href="/events/{{ ed.event.slug }}/" class="btn btn-outline btn-sm" target="_blank">👁 View</a>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding:1.75rem 2rem;">
+
+        <!-- Event Stats -->
+        <div class="stats-grid" style="margin-bottom:2rem;">
+          <div class="stat-card">
+            <div class="stat-value">{{ ed.total_votes }}</div>
+            <div class="stat-label">Total Votes</div>
+          </div>
+          <div class="stat-card" style="border-color:var(--gold);">
+            <div class="stat-value" style="color:var(--gold);">₵{{ ed.total_revenue }}</div>
+            <div class="stat-label">Gross Revenue</div>
+          </div>
+          <div class="stat-card" style="border-color:var(--red);">
+            <div class="stat-value" style="color:var(--red);">₵{{ ed.commission_amount }}</div>
+            <div class="stat-label">Commission ({{ ed.commission_rate }}%)</div>
+          </div>
+          <div class="stat-card" style="border-color:green;">
+            <div class="stat-value" style="color:green;">₵{{ ed.net_revenue }}</div>
+            <div class="stat-label">Net Earnings</div>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:2rem; margin-bottom:2rem;">
+
+          <!-- Categories -->
+          <div>
+            <h4 style="margin-bottom:1.25rem; color:var(--gray-600); font-size:0.85rem; text-transform:uppercase; letter-spacing:0.05em;">
+              Categories & Votes
+            </h4>
+            {% for category in ed.categories %}
+            <div style="margin-bottom:1rem;">
+              <div style="display:flex; justify-content:space-between; margin-bottom:0.35rem; font-size:0.88rem;">
+                <strong>{{ category.name }}</strong>
+                <span style="color:var(--gray-600);">{{ category.total_votes }} votes</span>
+              </div>
+              <div class="vote-bar-track">
+                {% if ed.total_votes > 0 %}
+                  {% widthratio category.total_votes ed.total_votes 100 as cat_pct %}
+                  <div class="vote-bar-fill" style="width:{{ cat_pct }}%;"></div>
+                {% else %}
+                  <div class="vote-bar-fill" style="width:0%;"></div>
+                {% endif %}
+              </div>
+            </div>
+            {% empty %}
+            <p style="color:var(--gray-400); font-size:0.88rem;">No categories yet</p>
+            {% endfor %}
+          </div>
+
+          <!-- Recent Payments -->
+          <div>
+            <h4 style="margin-bottom:1.25rem; color:var(--gray-600); font-size:0.85rem; text-transform:uppercase; letter-spacing:0.05em;">
+              Recent Payments
+            </h4>
+            {% for tx in ed.recent_transactions %}
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:0.6rem 0; border-bottom:1px solid var(--gray-100); font-size:0.85rem;">
+              <div>
+                <div style="font-weight:600;">{{ tx.nominee.name }}</div>
+                <div style="color:var(--gray-400); font-size:0.78rem;">
+                  {{ tx.phone_number }} · {{ tx.created_at|date:"M d, g:i A" }}
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-weight:700; color:var(--red);">₵{{ tx.amount }}</div>
+                <div style="font-size:0.75rem; color:green;">{{ tx.vote_quantity }} votes</div>
+              </div>
+            </div>
+            {% empty %}
+            <p style="color:var(--gray-400); font-size:0.88rem; padding:1rem 0;">No payments yet</p>
+            {% endfor %}
+          </div>
+
+        </div>
+
+        <!-- Leaderboard (collapsible) -->
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer; padding:0.75rem 1rem; background:var(--gray-100); border-radius:10px;"
+               onclick="toggleLeaderboard('lb-{{ ed.event.id }}', 'arrow-{{ ed.event.id }}')">
+            <h4 style="margin:0; color:var(--gray-600); font-size:0.85rem; text-transform:uppercase; letter-spacing:0.05em;">
+              🏆 Leaderboard
+            </h4>
+            <div style="display:flex; align-items:center; gap:1rem;">
+              <a href="/results/{{ ed.event.slug }}/" class="btn btn-outline-gold btn-sm"
+                 target="_blank" onclick="event.stopPropagation()">Full Results →</a>
+              <span id="arrow-{{ ed.event.id }}"
+                    style="color:var(--gray-600); font-size:1.1rem; transition:transform 0.3s ease; display:inline-block;">▼</span>
+            </div>
+          </div>
+
+          <!-- Collapsible content -->
+          <div id="lb-{{ ed.event.id }}" style="display:none; margin-top:0.75rem;">
+            {% for nominee in ed.top_nominees %}
+            <div style="display:flex; align-items:center; gap:1rem; padding:0.75rem 0; border-bottom:1px solid var(--gray-100);">
+              <!-- Rank -->
+              <div style="width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.82rem; flex-shrink:0;
+                          background:{% if forloop.counter == 1 %}var(--gold){% elif forloop.counter == 2 %}#C0C0C0{% elif forloop.counter == 3 %}#CD7F32{% else %}var(--gray-100){% endif %};
+                          color:{% if forloop.counter <= 3 %}var(--ash){% else %}var(--gray-600){% endif %};">
+                {{ forloop.counter }}
+              </div>
+              <!-- Photo -->
+              <div style="width:40px; height:40px; border-radius:50%; overflow:hidden; background:var(--gray-100); display:flex; align-items:center; justify-content:center; font-size:1.1rem; color:var(--gold); flex-shrink:0;">
+                {% if nominee.photo %}
+                  <img src="{{ nominee.photo.url }}" alt="{{ nominee.name }}" style="width:100%;height:100%;object-fit:cover;">
+                {% else %}♛{% endif %}
+              </div>
+              <!-- Info -->
+              <div style="flex:1; min-width:0;">
+                <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:0.25rem; flex-wrap:wrap; gap:0.5rem;">
+                  <strong style="font-size:0.9rem;">{{ nominee.name }}</strong>
+                  <span style="font-size:0.78rem; color:var(--gray-600);">{{ nominee.category.name }}</span>
+                </div>
+                <div class="vote-bar-track" style="height:5px;">
+                  <div class="vote-bar-fill" style="width:{{ nominee.vote_percentage }}%;"></div>
+                </div>
+              </div>
+              <!-- Votes -->
+              <div style="text-align:right; flex-shrink:0;">
+                <div style="font-weight:800; color:var(--red);">{{ nominee.total_votes }}</div>
+                <div style="font-size:0.72rem; color:var(--gray-400);">{{ nominee.vote_percentage }}%</div>
+              </div>
+            </div>
+            {% empty %}
+            <p style="color:var(--gray-400); font-size:0.88rem; padding:1rem 0;">No nominees yet</p>
+            {% endfor %}
+          </div>
+        </div>
+
+      </div>
+    </div>
+    {% endfor %}
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleLeaderboard(id, arrowId) {
+  const panel = document.getElementById(id);
+  const arrow = document.getElementById(arrowId);
+  if (panel.style.display === 'none') {
+    panel.style.display = 'block';
+    arrow.style.transform = 'rotate(180deg)';
+  } else {
+    panel.style.display = 'none';
+    arrow.style.transform = 'rotate(0deg)';
+  }
+}
+</script>
+{% endblock %}

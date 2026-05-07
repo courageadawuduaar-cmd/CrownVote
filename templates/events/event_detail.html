@@ -1,0 +1,78 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}{{ event.title }} — CrownVote{% endblock %}
+{% load voting_tags %}
+{% block content %}
+
+<section style="background:var(--ash); padding:3rem 2rem; border-bottom:4px solid var(--gold);">
+  <div class="container" style="color:white;">
+    <span class="event-status-badge status-{{ event.status }}" style="position:static; display:inline-block; margin-bottom:1rem;">{{ event.get_status_display }}</span>
+    <h1 style="color:white; margin-bottom:0.75rem;">{{ event.title }}</h1>
+    <p style="color:var(--gray-200); max-width:600px;">{{ event.description }}</p>
+    <div class="event-meta" style="margin-top:1rem; color:var(--gray-400);">
+      <span>📅 {{ event.start_date|date:"M d" }} – {{ event.end_date|date:"M d, Y" }}</span>
+      <span>🗳 {{ event.total_votes }} total votes</span>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    {% for category in categories %}
+    <div style="margin-bottom:4rem;">
+      <h2 style="margin-bottom:0.4rem;">{{ category.name }}</h2>
+      <div style="width:50px; height:4px; background:linear-gradient(90deg, var(--red), var(--gold)); border-radius:2px; margin-bottom:2rem;"></div>
+      <div class="nominees-grid">
+        {% for nominee in category.nominees.all %}
+        {% if nominee.is_active %}
+        <div class="nominee-card {% if nominee.is_featured %}featured{% endif %}">
+          <div class="nominee-photo">
+            {% if nominee.photo %}
+              <img src="{{ nominee.photo.url }}" alt="{{ nominee.name }}">
+            {% else %}
+              <div class="nominee-photo-placeholder">♛</div>
+            {% endif %}
+          </div>
+          <div class="nominee-info" style="text-align:center;">
+            <h4>{{ nominee.name }}</h4>
+
+            <!-- Short code badge -->
+            <div style="margin-bottom:0.6rem;">
+                <span class="short-code-badge">{{ nominee.short_code }}</span>
+            </div>
+
+            {% if nominee.bio %}
+                <p class="bio">{{ nominee.bio|truncatewords:15 }}</p>
+            {% endif %}
+
+            <div class="vote-bar-wrap">
+                <div class="vote-bar-header">
+                <span>{{ nominee.total_votes }} votes</span>
+                <span>{{ nominee.vote_percentage }}%</span>
+                </div>
+                <div class="vote-bar-track">
+                <div class="vote-bar-fill" style="width:{{ nominee.vote_percentage }}%;"></div>
+                </div>
+            </div>
+
+            {% if event.is_active %}
+            <a href="/voting/{{ nominee.id|encoded }}/vote/" class="btn btn-primary btn-sm btn-block" style="margin-top:1rem;">
+                🗳 Vote Now
+            </a>
+            <a href="/voting/campaign/{{ nominee.slug }}-{{ nominee.id|encoded }}/"
+                style="display:block; text-align:center; margin-top:0.5rem; font-size:0.8rem; color:var(--gray-600);">
+                📣 Share campaign page
+            </a>
+            {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+    {% empty %}
+    <p style="text-align:center; color:var(--gray-600);">No categories added yet.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends 'base/base.html' %}
+{% block title %}Live Results — CrownVote{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="section-title">
+      <h2>Live Results</h2>
+      <div class="underline"></div>
+      <p>Real-time vote counts updated instantly</p>
+    </div>
+    <div class="events-grid">
+      {% for event in events %}
+      <a href="/results/{{ event.slug }}/" class="event-card">
+        <div class="event-card-banner">
+          {% if event.banner %}<img src="{{ event.banner.url }}" alt="{{ event.title }}">{% endif %}
+          <span class="event-status-badge status-active">● Live</span>
+        </div>
+        <div class="event-card-body">
+          <h3>{{ event.title }}</h3>
+          <div class="event-meta">
+            <span>🗳 {{ event.total_votes }} votes</span>
+            <span>💰 ₵{{ event.total_revenue }}</span>
+          </div>
+          <span class="btn btn-gold btn-sm btn-block">View Results</span>
+        </div>
+      </a>
+      {% empty %}
+      <p style="grid-column:1/-1; text-align:center; color:var(--gray-600);">No live events right now.</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

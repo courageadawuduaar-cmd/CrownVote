@@ -1,0 +1,49 @@
+{% extends 'base/base.html' %}
+{% block title %}Votes Added! — CrownVote{% endblock %}
+{% block content %}
+<section class="section" style="min-height:80vh; display:flex; align-items:center; justify-content:center;">
+  <div style="text-align:center; max-width:480px; padding:2rem;">
+
+    <div style="font-size:5rem; margin-bottom:1rem; animation: popIn 0.5s ease;">🎉</div>
+    <h1 style="color:var(--gold); margin-bottom:0.75rem;">Votes Added!</h1>
+    <p style="color:var(--ash-light); font-size:1.05rem; margin-bottom:2rem;">
+      <strong>{{ transaction.vote_quantity }} vote(s)</strong> have been successfully added for <strong>{{ nominee.name }}</strong>!
+    </p>
+
+    <div style="background:var(--white); border-radius:16px; padding:1.5rem; box-shadow:0 2px 12px rgba(0,0,0,0.08); margin-bottom:2rem; border-left:4px solid var(--gold);">
+      <div style="display:flex; justify-content:space-between; margin-bottom:0.6rem; font-size:0.9rem;">
+        <span style="color:var(--gray-600);">Reference</span>
+        <code style="font-size:0.82rem; color:var(--ash);">{{ transaction.reference }}</code>
+      </div>
+      <div style="display:flex; justify-content:space-between; margin-bottom:0.6rem; font-size:0.9rem;">
+        <span style="color:var(--gray-600);">Amount paid</span>
+        <strong style="color:var(--red);">₵{{ transaction.amount }}</strong>
+      </div>
+      <div style="display:flex; justify-content:space-between; font-size:0.9rem;">
+        <span style="color:var(--gray-600);">Current total votes</span>
+        <strong style="color:var(--gold);">{{ nominee.total_votes }}</strong>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
+      <a href="/voting/{{ encoded_id }}/vote/" class="btn btn-primary">🗳 Vote Again</a>
+      <a href="/results/{{ nominee.category.event.slug }}/" class="btn btn-gold">📊 See Live Results</a>
+      <a href="/events/{{ nominee.category.event.slug }}/" class="btn btn-outline-gold">← Back to Event</a>
+      <a href="/voting/campaign/{{ nominee.slug }}-{{ nominee.id }}/" class="btn btn-gold">📣 Share Campaign</a>
+    </div>
+
+    <p style="margin-top:2rem; font-size:0.82rem; color:var(--gray-400);">
+      Share this with friends and get more votes for {{ nominee.name }}! 🔥
+    </p>
+
+  </div>
+</section>
+
+<style>
+@keyframes popIn {
+  0%   { transform: scale(0.5); opacity: 0; }
+  70%  { transform: scale(1.2); }
+  100% { transform: scale(1);   opacity: 1; }
+}
+</style>
+{% endblock %}
