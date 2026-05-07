@@ -7,7 +7,19 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-me-in-producti
 
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*']  # allows all hosts
+
+if not DEBUG:
+    ALLOWED_HOSTS = [
+        'crownvote-j3qa.onrender.com',
+        'localhost',
+        '127.0.0.1',
+    ]
+    # Also allow any host from environment variable
+    import os
+    extra_hosts = os.environ.get('ALLOWED_HOSTS', '')
+    if extra_hosts:
+        ALLOWED_HOSTS += [h.strip() for h in extra_hosts.split(',')]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
