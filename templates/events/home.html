@@ -9,7 +9,8 @@
 <section class="hero" style="padding:0; min-height:100vh; position:relative; display:flex; align-items:center; justify-content:center;">
 
   <!-- Video Background -->
-  <div style="position:absolute; inset:0; overflow:hidden; z-index:0;">
+<div style="position:absolute; inset:0; overflow:hidden; z-index:0;">
+  {% if videos %}
     {% for vid in videos %}
     <video
       class="hero-video"
@@ -21,39 +22,48 @@
       style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
              opacity:{% if forloop.first %}1{% else %}0{% endif %};
              transition:opacity 1.5s ease;">
-      {% if use_static %}
-        <source src="{% static vid %}" type="video/mp4">
-      {% else %}
-        <source src="{{ vid }}" type="video/mp4">
-      {% endif %}
+      <source src="{{ vid }}" type="video/mp4">
     </video>
     {% endfor %}
+  {% else %}
+    <!-- No videos uploaded — show dark background -->
+    <div style="position:absolute; inset:0; background:var(--ash);"></div>
+  {% endif %}
 
-    <!-- Dark overlay -->
-    <div style="position:absolute; inset:0; background:linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.75) 100%); z-index:1;"></div>
-  </div>
+  <!-- Dark overlay -->
+  <div style="position:absolute; inset:0; background:linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.75) 100%); z-index:1;"></div>
+</div>
 
   <!-- Hero Content -->
   <div class="hero-content" style="position:relative; z-index:2; padding:6rem 2rem 5rem; text-align:center;">
     <div class="hero-badge" id="heroBadge">{{ site_settings.hero_badge }}</div>
+
+    <h1 id="heroHeading"
+        style="opacity:0; transition:opacity 0.8s ease, transform 0.8s ease; color:white; margin-bottom:1rem;">
+    </h1>
+
+    <p id="heroSubtext"
+       style="opacity:0; transition:opacity 0.8s ease, transform 0.8s ease; color:var(--gray-200); font-size:1.05rem; max-width:600px; margin:0 auto 2rem;">
+    </p>
 
     <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
       <a href="/events/" class="btn btn-primary btn-lg">View All Events</a>
       <a href="/results/" class="btn btn-outline-gold btn-lg">Live Results</a>
     </div>
 
+    {% if videos|length > 1 %}
     <!-- Video indicator dots -->
     <div id="videoDots" style="display:flex; gap:0.5rem; justify-content:center; margin-top:2rem;">
       {% for vid in videos %}
       <div class="vid-dot" id="dot-{{ forloop.counter }}"
-           style="width:{% if forloop.first %}24px{% else %}8px{% endif %}; height:8px; border-radius:100px;
+          style="width:{% if forloop.first %}24px{% else %}8px{% endif %}; height:8px; border-radius:100px;
                   background:{% if forloop.first %}var(--gold){% else %}rgba(255,255,255,0.4){% endif %};
                   transition:all 0.4s ease; cursor:pointer;"
-           onclick="goToSlide({{ forloop.counter0 }})">
+          onclick="goToSlide({{ forloop.counter0 }})">
       </div>
       {% endfor %}
     </div>
-  </div>
+    {% endif %}
 
 </section>
 
@@ -192,48 +202,50 @@ const heading = document.getElementById('heroHeading');
 const subtext = document.getElementById('heroSubtext');
 
 // Set initial text from slide 0
-heading.textContent  = slides[0].heading;
-subtext.textContent  = slides[0].subtext;
-// Small delay so the fade-in is visible on first load
-setTimeout(() => {
-  heading.style.opacity   = '1';
-  heading.style.transform = 'translateY(0)';
-  subtext.style.opacity   = '1';
-  subtext.style.transform = 'translateY(0)';
-}, 100);
-
-function animateText(index) {
-  // Step 1: fade out
-  heading.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-  subtext.style.transition  = 'opacity 0.5s ease, transform 0.5s ease';
-  heading.style.opacity     = '0';
-  heading.style.transform   = 'translateY(-12px)';
-  subtext.style.opacity     = '0';
-  subtext.style.transform   = 'translateY(-12px)';
+if (heading && subtext && slides.length > 0) {
+  heading.textContent = slides[0].heading;
+  subtext.textContent = slides[0].subtext;
 
   setTimeout(() => {
-    // Step 2: swap text while invisible
-    heading.textContent     = slides[index].heading;
-    subtext.textContent     = slides[index].subtext;
+    heading.style.opacity   = '1';
+    heading.style.transform = 'translateY(0)';
+    subtext.style.opacity   = '1';
+    subtext.style.transform = 'translateY(0)';
+  }, 300);
+}
 
-    // Step 3: reset position below
+function animateText(index) {
+  if (!heading || !subtext) return;
+
+  // Fade out
+  heading.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+  subtext.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+  heading.style.opacity    = '0';
+  heading.style.transform  = 'translateY(-15px)';
+  subtext.style.opacity    = '0';
+  subtext.style.transform  = 'translateY(-15px)';
+
+  setTimeout(() => {
+    heading.textContent = slides[index].heading;
+    subtext.textContent = slides[index].subtext;
+
+    // Reset from below
     heading.style.transition = 'none';
-    subtext.style.transition  = 'none';
-    heading.style.transform   = 'translateY(12px)';
-    subtext.style.transform   = 'translateY(12px)';
+    subtext.style.transition = 'none';
+    heading.style.transform  = 'translateY(15px)';
+    subtext.style.transform  = 'translateY(15px)';
 
-    // Force reflow so transition fires
     void heading.offsetWidth;
     void subtext.offsetWidth;
 
-    // Step 4: fade in from below
-    heading.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-    subtext.style.transition  = 'opacity 0.6s ease, transform 0.6s ease';
-    heading.style.opacity     = '1';
-    heading.style.transform   = 'translateY(0)';
-    subtext.style.opacity     = '1';
-    subtext.style.transform   = 'translateY(0)';
-  }, 500);
+    // Fade in
+    heading.style.transition = 'opacity 0.7s ease, transform 0.7s ease';
+    subtext.style.transition = 'opacity 0.7s ease, transform 0.7s ease';
+    heading.style.opacity    = '1';
+    heading.style.transform  = 'translateY(0)';
+    subtext.style.opacity    = '1';
+    subtext.style.transform  = 'translateY(0)';
+  }, 600);
 }
 
 function updateDots(index) {
@@ -246,13 +258,11 @@ function updateDots(index) {
 function goToSlide(index) {
   if (index === current) return;
 
-  // Fade out current video
   const oldVid = document.getElementById(`vid-${current + 1}`);
   if (oldVid) oldVid.style.opacity = '0';
 
   current = index;
 
-  // Fade in new video
   const newVid = document.getElementById(`vid-${current + 1}`);
   if (newVid) {
     newVid.style.opacity = '1';
@@ -260,11 +270,9 @@ function goToSlide(index) {
     newVid.play().catch(() => {});
   }
 
-  // Sync text with video
   animateText(current);
   updateDots(current);
 
-  // Reset timer
   clearTimeout(timer);
   startTimer();
 }
@@ -274,25 +282,24 @@ function nextSlide() {
 }
 
 function startTimer() {
-  // Use actual video duration, fall back to 8s
-  const vid      = document.getElementById(`vid-${current + 1}`);
-  const duration = (vid && vid.duration && !isNaN(vid.duration) && vid.duration > 0)
-                    ? (vid.duration * 1000)
-                    : 8000;
+  // Always show each slide for at least 10 seconds
+  // If video is longer, use video duration
+  const vid = document.getElementById(`vid-${current + 1}`);
+  let duration = 10000; // default 10 seconds
+
+  if (vid && vid.duration && !isNaN(vid.duration) && vid.duration > 10) {
+    duration = vid.duration * 1000;
+  }
+
   timer = setTimeout(nextSlide, duration);
 }
 
-// Auto-advance on video end
+// Auto-advance on video end — only if video is longer than 10s
 document.querySelectorAll('.hero-video').forEach((vid, i) => {
   vid.addEventListener('ended', () => {
-    clearTimeout(timer);
-    nextSlide();
-  });
-
-  vid.addEventListener('loadedmetadata', () => {
     if (i === current) {
       clearTimeout(timer);
-      startTimer();
+      nextSlide();
     }
   });
 });
@@ -301,7 +308,7 @@ document.querySelectorAll('.hero-video').forEach((vid, i) => {
 const firstVid = document.getElementById('vid-1');
 if (firstVid) firstVid.play().catch(() => {});
 
-// Start
+// Start with 10 second minimum
 startTimer();
 </script>
 {% endblock %}

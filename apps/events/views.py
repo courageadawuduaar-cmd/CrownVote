@@ -21,25 +21,16 @@ def home(request):
 
     db_videos = HeroVideo.objects.filter(is_active=True).order_by('order')
 
-    if db_videos.exists():
-        use_static = False
-        videos     = [v.video.url for v in db_videos]
-        slides     = [
-            {
-                'heading': v.hero_heading,
-                'subtext': v.hero_subtext,
-            }
-            for v in db_videos
-        ]
-    else:
-        use_static = True
-        videos     = [
-            'images/crownn.mp4',
-            'images/crownn1.mp4',
-            'images/crownn2.mp4',
-        ]
-        slides = [{'heading': '', 'subtext': ''}] * len(videos)
+    videos     = [v.video.url for v in db_videos]
+    slides     = [
+        {
+            'heading': v.hero_heading,
+            'subtext': v.hero_subtext,
+        }
+        for v in db_videos
+    ]
 
+    import json
     slides_json = json.dumps(slides)
 
     return render(request, 'events/home.html', {
@@ -47,11 +38,10 @@ def home(request):
         'all_events':     all_events,
         'steps':          STEPS,
         'videos':         videos,
-        'use_static':     use_static,
+        'use_static':     False,
         'site_settings':  settings_obj,
         'slides_json':    slides_json,
     })
-
 
 def event_list(request):
     events = Event.objects.exclude(status='draft').order_by('-created_at')
