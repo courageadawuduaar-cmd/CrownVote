@@ -7,19 +7,7 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-me-in-producti
 
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = ['*']  # allows all hosts
-
-if not DEBUG:
-    ALLOWED_HOSTS = [
-        'crownvote-j3qa.onrender.com',
-        'localhost',
-        '127.0.0.1',
-    ]
-    # Also allow any host from environment variable
-    import os
-    extra_hosts = os.environ.get('ALLOWED_HOSTS', '')
-    if extra_hosts:
-        ALLOWED_HOSTS += [h.strip() for h in extra_hosts.split(',')]
+ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -28,7 +16,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # CrownVote Apps
     'apps.events',
     'apps.categories',
     'apps.nominees',
@@ -103,12 +90,12 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # CrownVote Brand Colors
-BRAND_PRIMARY   = '#C8102E'   # Red
-BRAND_SECONDARY = '#2C2C2C'   # Black Ash
-BRAND_ACCENT    = '#D4AF37'   # Gold
+BRAND_PRIMARY   = '#C8102E'
+BRAND_SECONDARY = '#2C2C2C'
+BRAND_ACCENT    = '#D4AF37'
 
 # Voting config
-VOTE_PRICE_GHS = 1  # ₵1 = 1 vote
+VOTE_PRICE_GHS = 1
 
 # Paystack
 PAYSTACK_SECRET_KEY = config('PAYSTACK_SECRET_KEY', default='')
@@ -119,7 +106,6 @@ BASE_URL = config('BASE_URL', default='http://127.0.0.1:8000')
 # SECURITY HEADERS (Production only)
 # ─────────────────────────────────────────
 if not DEBUG:
-    ALLOWED_HOSTS                  = config('ALLOWED_HOSTS', default='').split(',')
     SECURE_SSL_REDIRECT            = True
     SESSION_COOKIE_SECURE          = True
     CSRF_COOKIE_SECURE             = True
