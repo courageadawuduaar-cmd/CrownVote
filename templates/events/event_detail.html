@@ -1,12 +1,17 @@
 {% extends 'base/base.html' %}
 {% load static %}
-{% block title %}{{ event.title }} — CrownVote{% endblock %}
 {% load voting_tags %}
+{% block title %}{{ event.title }} — CrownVote{% endblock %}
+
 {% block content %}
 
+<!-- Event Header -->
 <section style="background:var(--ash); padding:3rem 2rem; border-bottom:4px solid var(--gold);">
   <div class="container" style="color:white;">
-    <span class="event-status-badge status-{{ event.status }}" style="position:static; display:inline-block; margin-bottom:1rem;">{{ event.get_status_display }}</span>
+    <span class="event-status-badge status-{{ event.status }}"
+          style="position:static; display:inline-block; margin-bottom:1rem;">
+      {{ event.get_status_display }}
+    </span>
     <h1 style="color:white; margin-bottom:0.75rem;">{{ event.title }}</h1>
     <p style="color:var(--gray-200); max-width:600px;">{{ event.description }}</p>
     <div class="event-meta" style="margin-top:1rem; color:var(--gray-400);">
@@ -16,63 +21,145 @@
   </div>
 </section>
 
+<!-- Categories -->
 <section class="section">
   <div class="container">
+
     {% for category in categories %}
-    <div style="margin-bottom:4rem;">
-      <h2 style="margin-bottom:0.4rem;">{{ category.name }}</h2>
-      <div style="width:50px; height:4px; background:linear-gradient(90deg, var(--red), var(--gold)); border-radius:2px; margin-bottom:2rem;"></div>
-      <div class="nominees-grid">
-        {% for nominee in category.nominees.all %}
-        {% if nominee.is_active %}
-        <div class="nominee-card {% if nominee.is_featured %}featured{% endif %}">
-          <div class="nominee-photo">
-            {% if nominee.photo %}
-              <img src="{{ nominee.photo.url }}" alt="{{ nominee.name }}">
-            {% else %}
-              <div class="nominee-photo-placeholder">♛</div>
-            {% endif %}
+    {% with active_nominees=category.nominees.all %}
+
+    <!-- Category Card -->
+    <div style="margin-bottom:1.5rem; border-radius:16px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,0.08); border:1px solid var(--gray-200);">
+
+      <!-- Clickable Category Header -->
+      <div onclick="toggleCategory('cat-{{ category.id }}', 'arrow-{{ category.id }}')"
+           style="display:flex; justify-content:space-between; align-items:center; padding:1.5rem 2rem;
+                  background:white; cursor:pointer; transition:background 0.2s;"
+           onmouseover="this.style.background='var(--gray-100)'"
+           onmouseout="this.style.background='white'">
+        <div style="display:flex; align-items:center; gap:1rem;">
+          <!-- Category icon -->
+          <div style="width:48px; height:48px; border-radius:12px;
+                      background:linear-gradient(135deg, var(--red), var(--gold));
+                      display:flex; align-items:center; justify-content:center;
+                      font-size:1.4rem; flex-shrink:0;">
+            ♛
           </div>
-          <div class="nominee-info" style="text-align:center;">
-            <h4>{{ nominee.name }}</h4>
+          <div>
+            <h3 style="margin:0; font-size:1.1rem; color:var(--ash);">{{ category.name }}</h3>
+            <p style="margin:0; font-size:0.82rem; color:var(--gray-600); margin-top:0.2rem;">
+              {{ category.nominees.all|length }} nominee{{ category.nominees.all|length|pluralize }}
+              · {{ category.total_votes }} vote{{ category.total_votes|pluralize }}
+            </p>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:1rem;">
+          {% if event.is_active %}
+          <span style="font-size:0.78rem; color:var(--gold); font-weight:600; background:rgba(212,175,55,0.1);
+                        padding:0.3rem 0.8rem; border-radius:100px; border:1px solid var(--gold);">
+            Voting Open
+          </span>
+          {% endif %}
+          <span id="arrow-{{ category.id }}"
+                style="font-size:1.2rem; color:var(--gray-600); transition:transform 0.3s ease; display:inline-block;">
+            ▼
+          </span>
+        </div>
+      </div>
 
-            <!-- Short code badge -->
-            <div style="margin-bottom:0.6rem;">
-                <span class="short-code-badge">{{ nominee.short_code }}</span>
+      <!-- Collapsible Nominees Panel -->
+      <div id="cat-{{ category.id }}"
+           style="display:none; background:var(--gray-100); padding:2rem;">
+        <div class="nominees-grid">
+          {% for nominee in category.nominees.all %}
+          {% if nominee.is_active %}
+          <div class="nominee-card {% if nominee.is_featured %}featured{% endif %}">
+            <div class="nominee-photo">
+              {% if nominee.photo %}
+                <img src="{{ nominee.photo.url }}" alt="{{ nominee.name }}">
+              {% else %}
+                <div class="nominee-photo-placeholder">♛</div>
+              {% endif %}
             </div>
+            <div class="nominee-info" style="text-align:center;">
+              <h4>{{ nominee.name }}</h4>
 
-            {% if nominee.bio %}
+              <div style="margin-bottom:0.6rem;">
+                <span class="short-code-badge">{{ nominee.short_code }}</span>
+              </div>
+
+              {% if nominee.bio %}
                 <p class="bio">{{ nominee.bio|truncatewords:15 }}</p>
-            {% endif %}
+              {% endif %}
 
-            <div class="vote-bar-wrap">
+              <div class="vote-bar-wrap">
                 <div class="vote-bar-header">
-                <span>{{ nominee.total_votes }} votes</span>
-                <span>{{ nominee.vote_percentage }}%</span>
+                  <span>{{ nominee.total_votes }} votes</span>
+                  <span>{{ nominee.vote_percentage }}%</span>
                 </div>
                 <div class="vote-bar-track">
-                <div class="vote-bar-fill" style="width:{{ nominee.vote_percentage }}%;"></div>
+                  <div class="vote-bar-fill" style="width:{{ nominee.vote_percentage }}%;"></div>
                 </div>
-            </div>
+              </div>
 
-            {% if event.is_active %}
-            <a href="/voting/{{ nominee.id|encoded }}/vote/" class="btn btn-primary btn-sm btn-block" style="margin-top:1rem;">
+              {% if event.is_active %}
+              <a href="/voting/{{ nominee.id|encoded }}/vote/"
+                 class="btn btn-primary btn-sm btn-block" style="margin-top:1rem;">
                 🗳 Vote Now
-            </a>
-            <a href="/voting/campaign/{{ nominee.slug }}-{{ nominee.id|encoded }}/"
-                style="display:block; text-align:center; margin-top:0.5rem; font-size:0.8rem; color:var(--gray-600);">
+              </a>
+              <a href="/voting/campaign/{{ nominee.slug }}-{{ nominee.id|encoded }}/"
+                 style="display:block; text-align:center; margin-top:0.5rem; font-size:0.8rem; color:var(--gray-600);">
                 📣 Share campaign page
-            </a>
-            {% endif %}
+              </a>
+              {% endif %}
             </div>
+          </div>
+          {% endif %}
+          {% endfor %}
         </div>
+
+        {% if not category.nominees.all %}
+        <p style="text-align:center; color:var(--gray-400); padding:2rem 0;">
+          No nominees in this category yet.
+        </p>
         {% endif %}
-        {% endfor %}
+
       </div>
     </div>
+
+    {% endwith %}
     {% empty %}
     <p style="text-align:center; color:var(--gray-600);">No categories added yet.</p>
     {% endfor %}
+
   </div>
 </section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleCategory(panelId, arrowId) {
+  const panel = document.getElementById(panelId);
+  const arrow = document.getElementById(arrowId);
+
+  if (panel.style.display === 'none') {
+    panel.style.display = 'block';
+    arrow.style.transform = 'rotate(180deg)';
+  } else {
+    panel.style.display = 'none';
+    arrow.style.transform = 'rotate(0deg)';
+  }
+}
+
+// Open first category by default
+document.addEventListener('DOMContentLoaded', function () {
+  const firstPanel = document.querySelector('[id^="cat-"]');
+  const firstArrow = document.querySelector('[id^="arrow-"]');
+  if (firstPanel) {
+    firstPanel.style.display = 'block';
+    if (firstArrow) firstArrow.style.transform = 'rotate(180deg)';
+  }
+});
+</script>
 {% endblock %}
