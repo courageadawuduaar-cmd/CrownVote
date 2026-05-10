@@ -24,6 +24,8 @@ INSTALLED_APPS = [
     'apps.results',
     'apps.dashboard',
     'apps.accounts',
+    'cloudinary',
+    'cloudinary_storage',
 ]
 
 MIDDLEWARE = [
@@ -115,3 +117,19 @@ if not DEBUG:
     SECURE_BROWSER_XSS_FILTER      = True
     SECURE_CONTENT_TYPE_NOSNIFF    = True
     X_FRAME_OPTIONS                = 'DENY'
+
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME', default=''),
+    'API_KEY':    config('CLOUDINARY_API_KEY', default=''),
+    'API_SECRET': config('CLOUDINARY_API_SECRET', default=''),
+}
+
+import cloudinary
+cloudinary.config(
+    cloud_name = config('CLOUDINARY_CLOUD_NAME', default=''),
+    api_key    = config('CLOUDINARY_API_KEY', default=''),
+    api_secret = config('CLOUDINARY_API_SECRET', default=''),
+)

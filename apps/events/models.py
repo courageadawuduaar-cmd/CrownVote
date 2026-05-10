@@ -62,25 +62,27 @@ class Event(models.Model):
         return round(self.total_revenue - self.commission_amount, 2)
 
 
+from cloudinary.models import CloudinaryField
+
 class HeroVideo(models.Model):
-    """Videos shown in the homepage hero background."""
-    title      = models.CharField(
-                   max_length=100,
-                   help_text='Label for this video e.g. "Awards Night 2024"'
-                 )
-    video      = models.FileField(
-                   upload_to='hero_videos/',
-                   help_text='Upload MP4 video file'
-                 )
+    title    = models.CharField(
+                 max_length=100,
+                 help_text='Label for this video e.g. "Awards Night 2024"'
+               )
+    video    = CloudinaryField(
+                 'video',
+                 resource_type='video',
+                 help_text='Upload MP4 video file'
+               )
     hero_heading  = models.CharField(
-                  max_length=200,
-                  blank=True,
-                  help_text='Main heading shown on homepage hero when this video plays e.g. "Vote for Your Favourite Star"'
-                )
+                      max_length=200,
+                      blank=True,
+                      help_text='Main heading shown on homepage hero when this video plays'
+                    )
     hero_subtext  = models.TextField(
-                  blank=True,
-                  help_text='Supporting text shown below the heading when this video plays.'
-                )
+                      blank=True,
+                      help_text='Supporting text shown below the heading when this video plays.'
+                    )
     order      = models.PositiveIntegerField(
                    default=0,
                    help_text='Display order — lower numbers show first'
