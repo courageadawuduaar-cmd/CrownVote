@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.crypto import get_random_string
+from cloudinary.models import CloudinaryField
 
 
 def generate_short_code():
@@ -14,8 +15,8 @@ class Nominee(models.Model):
     category    = models.ForeignKey('categories.Category', on_delete=models.CASCADE, related_name='nominees')
     name        = models.CharField(max_length=150)
     slug        = models.SlugField()
-    short_code = models.CharField(max_length=10, unique=True, blank=True)
-    photo       = models.ImageField(upload_to='nominees/', blank=True, null=True)
+    short_code  = models.CharField(max_length=10, unique=True, blank=True)
+    photo       = CloudinaryField('image', blank=True, null=True)
     bio         = models.TextField(blank=True)
     is_active   = models.BooleanField(default=True)
     is_featured = models.BooleanField(default=False)
@@ -29,7 +30,6 @@ class Nominee(models.Model):
         return f"{self.name} ({self.category.name})"
 
     def save(self, *args, **kwargs):
-        # Auto-generate short code on first save
         if not self.short_code:
             self.short_code = generate_short_code()
         super().save(*args, **kwargs)
