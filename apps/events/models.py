@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from decimal import Decimal
+from cloudinary.models import CloudinaryField
 
 
 class Event(models.Model):
@@ -14,7 +15,7 @@ class Event(models.Model):
     title           = models.CharField(max_length=200)
     slug            = models.SlugField(unique=True)
     description     = models.TextField(blank=True)
-    banner          = models.ImageField(upload_to='banners/', blank=True, null=True)
+    banner          = CloudinaryField('image', blank=True, null=True)
     status          = models.CharField(max_length=10, choices=STATUS_CHOICES, default='draft')
     start_date      = models.DateTimeField()
     end_date        = models.DateTimeField()
@@ -62,18 +63,16 @@ class Event(models.Model):
         return round(self.total_revenue - self.commission_amount, 2)
 
 
-from cloudinary.models import CloudinaryField
-
 class HeroVideo(models.Model):
-    title    = models.CharField(
-                 max_length=100,
-                 help_text='Label for this video e.g. "Awards Night 2024"'
-               )
-    video    = CloudinaryField(
-                 'video',
-                 resource_type='video',
-                 help_text='Upload MP4 video file'
-               )
+    title         = models.CharField(
+                      max_length=100,
+                      help_text='Label for this video e.g. "Awards Night 2024"'
+                    )
+    video         = CloudinaryField(
+                      'video',
+                      resource_type='video',
+                      help_text='Upload MP4 video file'
+                    )
     hero_heading  = models.CharField(
                       max_length=200,
                       blank=True,
@@ -83,15 +82,15 @@ class HeroVideo(models.Model):
                       blank=True,
                       help_text='Supporting text shown below the heading when this video plays.'
                     )
-    order      = models.PositiveIntegerField(
-                   default=0,
-                   help_text='Display order — lower numbers show first'
-                 )
-    is_active  = models.BooleanField(
-                   default=True,
-                   help_text='Uncheck to hide this video from the homepage'
-                 )
-    created_at = models.DateTimeField(auto_now_add=True)
+    order         = models.PositiveIntegerField(
+                      default=0,
+                      help_text='Display order — lower numbers show first'
+                    )
+    is_active     = models.BooleanField(
+                      default=True,
+                      help_text='Uncheck to hide this video from the homepage'
+                    )
+    created_at    = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ['order', 'created_at']
@@ -101,10 +100,6 @@ class HeroVideo(models.Model):
 
 
 class SiteSettings(models.Model):
-    """
-    Singleton model — only one instance should exist.
-    Controls global site settings editable from admin.
-    """
     hero_title    = models.CharField(
                       max_length=200,
                       default='Vote for Your Favourite Personality',
@@ -129,6 +124,5 @@ class SiteSettings(models.Model):
 
     @classmethod
     def get(cls):
-        """Always return the single settings instance, creating it if needed."""
         obj, _ = cls.objects.get_or_create(pk=1)
         return obj
