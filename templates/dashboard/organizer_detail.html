@@ -5,8 +5,24 @@
 {% block content %}
 <div style="display:flex; min-height:calc(100vh - 68px);">
 
+  <!-- Mobile sidebar toggle -->
+  <button class="sidebar-toggle"
+          onclick="toggleSidebar()"
+          style="display:none; position:fixed; bottom:1.5rem; right:1.5rem; z-index:1000;
+                 width:52px; height:52px; border-radius:50%; background:var(--gold);
+                 border:none; cursor:pointer; font-size:1.4rem; box-shadow:0 4px 16px rgba(0,0,0,0.3);
+                 align-items:center; justify-content:center;">
+    ☰
+  </button>
+
+  <!-- Overlay -->
+  <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+  <!-- Sidebar comes next -->
+  <aside class="dash-sidebar" ...
+
   <!-- Sidebar -->
-  <aside style="width:240px; background:var(--ash); border-right:1px solid var(--ash-light); padding:2rem 0; flex-shrink:0; position:sticky; top:68px; height:calc(100vh - 68px); overflow-y:auto;">
+  <aside class="dash-sidebar" style="width:240px; background:var(--ash); border-right:1px solid var(--ash-light); padding:2rem 0; flex-shrink:0; position:sticky; top:68px; height:calc(100vh - 68px); overflow-y:auto;">
     <div style="padding:0 1.5rem; margin-bottom:2rem;">
       <div style="font-size:0.75rem; color:var(--gray-400); text-transform:uppercase; letter-spacing:0.1em; font-weight:600;">Management</div>
     </div>
@@ -28,7 +44,7 @@
   </aside>
 
   <!-- Main -->
-  <main style="flex:1; padding:2.5rem; overflow-x:hidden;">
+  <main class="dash-main" style="flex:1; padding:2.5rem; overflow-x:hidden;">
 
     <!-- Back + Header -->
     <div style="margin-bottom:2rem;">
@@ -145,4 +161,57 @@
 
   </main>
 </div>
+
+<style>
+@media (max-width: 768px) {
+  .dash-sidebar {
+    position: fixed !important;
+    left: -240px !important;
+    top: 68px !important;
+    height: calc(100vh - 68px) !important;
+    z-index: 900 !important;
+    transition: left 0.3s ease !important;
+    box-shadow: 4px 0 20px rgba(0,0,0,0.3);
+  }
+  .dash-sidebar.open {
+    left: 0 !important;
+  }
+  .dash-main {
+    padding: 1.25rem !important;
+  }
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 899;
+    top: 68px;
+  }
+  .sidebar-overlay.show {
+    display: block;
+  }
+  .sidebar-toggle {
+    display: flex !important;
+  }
+  div[style*="grid-template-columns:2fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+  table { font-size: 0.78rem !important; }
+  th:nth-child(4), td:nth-child(4) { display: none; }
+  th:nth-child(5), td:nth-child(5) { display: none; }
+}
+@media (min-width: 769px) {
+  .sidebar-toggle { display: none !important; }
+}
+</style>
+
+<script>
+function toggleSidebar() {
+  const sidebar  = document.querySelector('.dash-sidebar');
+  const overlay  = document.querySelector('.sidebar-overlay');
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('show');
+}
+</script>
+
 {% endblock %}

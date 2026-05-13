@@ -4,42 +4,76 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
-{% endblock %}
-
 <style>
 @media (max-width: 768px) {
-  /* Hide sidebar on mobile */
-  aside {
-    display: none !important;
+  .dash-sidebar {
+    position: fixed !important;
+    left: -260px !important;
+    top: 68px !important;
+    height: calc(100vh - 68px) !important;
+    z-index: 900 !important;
+    transition: left 0.3s ease !important;
+    box-shadow: 4px 0 20px rgba(0,0,0,0.3);
+    width: 240px !important;
   }
-  /* Full width main */
-  main {
+  .dash-sidebar.open {
+    left: 0 !important;
+  }
+  .dash-main {
     padding: 1.25rem !important;
+    width: 100% !important;
   }
-  /* Stack event table columns */
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    top: 68px;
+    background: rgba(0,0,0,0.5);
+    z-index: 899;
+  }
+  .sidebar-overlay.show {
+    display: block;
+  }
+  .sidebar-toggle {
+    display: flex !important;
+  }
+  .dash-grid-2 {
+    grid-template-columns: 1fr !important;
+  }
   table {
     font-size: 0.78rem !important;
   }
-  /* Stack grid layouts */
-  div[style*="grid-template-columns:2fr 1fr"] {
-    grid-template-columns: 1fr !important;
-  }
-  div[style*="grid-template-columns:repeat(auto-fill"] {
-    grid-template-columns: 1fr 1fr !important;
-  }
-  /* Hide less important table columns on mobile */
-  th:nth-child(4), td:nth-child(4),
-  th:nth-child(5), td:nth-child(5) {
-    display: none;
+  .hide-mobile {
+    display: none !important;
   }
 }
+@media (min-width: 769px) {
+  .sidebar-toggle { display: none !important; }
+}
 </style>
+{% endblock %}
 
 {% block content %}
-<div style="display:flex; min-height:calc(100vh - 68px);">
+<div style="display:flex; min-height:calc(100vh - 68px); position:relative;">
+
+  <!-- Mobile Toggle Button -->
+  <button class="sidebar-toggle"
+          onclick="toggleSidebar()"
+          style="display:none; position:fixed; bottom:1.5rem; right:1.5rem; z-index:1000;
+                 width:52px; height:52px; border-radius:50%; background:var(--gold);
+                 border:none; cursor:pointer; font-size:1.4rem; box-shadow:0 4px 16px rgba(0,0,0,0.3);
+                 align-items:center; justify-content:center;">
+    ☰
+  </button>
+
+  <!-- Overlay -->
+  <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
   <!-- Sidebar -->
-  <aside style="width:240px; background:var(--ash); border-right:1px solid var(--ash-light); padding:2rem 0; flex-shrink:0; position:sticky; top:68px; height:calc(100vh - 68px); overflow-y:auto;">
+  <aside class="dash-sidebar"
+         style="width:240px; background:var(--ash); border-right:1px solid var(--ash-light);
+                padding:2rem 0; flex-shrink:0; position:sticky; top:68px;
+                height:calc(100vh - 68px); overflow-y:auto;">
     <div style="padding:0 1.5rem; margin-bottom:2rem;">
       <div style="font-size:0.75rem; color:var(--gray-400); text-transform:uppercase; letter-spacing:0.1em; font-weight:600;">Management</div>
     </div>
@@ -61,7 +95,7 @@
   </aside>
 
   <!-- Main Content -->
-  <main style="flex:1; padding:2.5rem; overflow-x:hidden;">
+  <main class="dash-main" style="flex:1; padding:2.5rem; overflow-x:hidden;">
 
     <div style="margin-bottom:2rem;">
       <h1 style="margin-bottom:0.25rem;">Dashboard</h1>
@@ -87,8 +121,8 @@
     </div>
 
     {% if active_tab == 'organizers' %}
-    <!-- Organizers Tab Content -->
-    <div style="background:white; border-radius:16px; padding:1.75rem; box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+    <!-- Organizers Tab -->
+    <div style="background:white; border-radius:16px; padding:1.75rem; box-shadow:0 1px 4px rgba(0,0,0,0.08); overflow-x:auto;">
       <h3 style="margin-bottom:1.5rem;">All Organizers</h3>
       {% if organizer_data %}
       <table style="width:100%; border-collapse:collapse; font-size:0.88rem;">
@@ -96,9 +130,9 @@
           <tr style="border-bottom:2px solid var(--gray-100);">
             <th style="text-align:left; padding:0.5rem 0; color:var(--gray-600); font-weight:600;">Organizer</th>
             <th style="text-align:center; color:var(--gray-600); font-weight:600;">Events</th>
-            <th style="text-align:right; color:var(--gray-600); font-weight:600;">Total Votes</th>
-            <th style="text-align:right; color:var(--gray-600); font-weight:600;">Gross Revenue</th>
-            <th style="text-align:right; color:var(--gray-600); font-weight:600;">Net Earnings</th>
+            <th style="text-align:right; color:var(--gray-600); font-weight:600;">Votes</th>
+            <th class="hide-mobile" style="text-align:right; color:var(--gray-600); font-weight:600;">Revenue</th>
+            <th class="hide-mobile" style="text-align:right; color:var(--gray-600); font-weight:600;">Net</th>
             <th style="text-align:right; color:var(--gray-600); font-weight:600;">Action</th>
           </tr>
         </thead>
@@ -107,15 +141,15 @@
           <tr style="border-bottom:1px solid var(--gray-100);">
             <td style="padding:0.9rem 0;">
               <strong style="display:block;">{{ org.user.get_full_name|default:org.user.username }}</strong>
-              <span style="color:var(--gray-400); font-size:0.8rem;">{{ org.user.email }}</span>
+              <span style="color:var(--gray-400); font-size:0.78rem;">{{ org.user.email }}</span>
             </td>
             <td style="text-align:center; font-weight:600;">{{ org.event_count }}</td>
             <td style="text-align:right; font-weight:700; color:var(--ash);">{{ org.total_votes }}</td>
-            <td style="text-align:right; font-weight:700; color:var(--gold);">₵{{ org.total_gross }}</td>
-            <td style="text-align:right; font-weight:700; color:green;">₵{{ org.total_net }}</td>
+            <td class="hide-mobile" style="text-align:right; font-weight:700; color:var(--gold);">₵{{ org.total_gross }}</td>
+            <td class="hide-mobile" style="text-align:right; font-weight:700; color:green;">₵{{ org.total_net }}</td>
             <td style="text-align:right;">
               <a href="/dashboard/organizers/{{ org.user.id }}/"
-                class="btn btn-sm btn-outline-gold">View Detail</a>
+                class="btn btn-sm btn-outline-gold">View</a>
             </td>
           </tr>
           {% endfor %}
@@ -148,14 +182,14 @@
       </div>
     </div>
 
-    <!-- Events Overview -->
-    <div style="display:grid; grid-template-columns:2fr 1fr; gap:2rem; margin-bottom:2rem; flex-wrap:wrap;">
+    <!-- Events + Transactions -->
+    <div class="dash-grid-2" style="display:grid; grid-template-columns:2fr 1fr; gap:2rem; margin-bottom:2rem;">
 
       <!-- Event Table -->
-      <div style="background:white; border-radius:16px; padding:1.75rem; box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+      <div style="background:white; border-radius:16px; padding:1.75rem; box-shadow:0 1px 4px rgba(0,0,0,0.08); overflow-x:auto;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
           <h3 style="margin:0;">All Events</h3>
-          <a href="/admin/events/event/add/" class="btn btn-primary btn-sm">+ New Event</a>
+          <a href="/admin/events/event/add/" class="btn btn-primary btn-sm">+ New</a>
         </div>
         <table style="width:100%; border-collapse:collapse; font-size:0.88rem;">
           <thead>
@@ -163,7 +197,7 @@
               <th style="text-align:left; padding:0.5rem 0; color:var(--gray-600); font-weight:600;">Event</th>
               <th style="text-align:center; color:var(--gray-600); font-weight:600;">Status</th>
               <th style="text-align:right; color:var(--gray-600); font-weight:600;">Votes</th>
-              <th style="text-align:right; color:var(--gray-600); font-weight:600;">Revenue</th>
+              <th class="hide-mobile" style="text-align:right; color:var(--gray-600); font-weight:600;">Revenue</th>
               <th style="text-align:right; color:var(--gray-600); font-weight:600;">Actions</th>
             </tr>
           </thead>
@@ -171,18 +205,20 @@
             {% for event in events %}
             <tr style="border-bottom:1px solid var(--gray-100);">
               <td style="padding:0.85rem 0;">
-                <strong style="display:block;">{{ event.title }}</strong>
-                <span style="color:var(--gray-400); font-size:0.8rem;">{{ event.categories.count }} categories · {{ event.end_date|date:"M d, Y" }}</span>
+                <strong style="display:block; font-size:0.88rem;">{{ event.title }}</strong>
+                <span style="color:var(--gray-400); font-size:0.78rem;">{{ event.end_date|date:"M d, Y" }}</span>
               </td>
               <td style="text-align:center;">
-                <span class="event-status-badge status-{{ event.status }}" style="position:static; display:inline-block;">{{ event.get_status_display }}</span>
+                <span class="event-status-badge status-{{ event.status }}" style="position:static; display:inline-block;">
+                  {{ event.get_status_display }}
+                </span>
               </td>
               <td style="text-align:right; font-weight:700; color:var(--ash);">{{ event.total_votes }}</td>
-              <td style="text-align:right; font-weight:700; color:var(--gold);">₵{{ event.total_revenue }}</td>
-              <td style="text-align:right;">
-                <a href="/results/{{ event.slug }}/" class="btn btn-sm btn-outline-gold" style="margin-right:4px;">Results</a>
-                <a href="/dashboard/report/{{ event.slug }}/" class="btn btn-sm btn-outline-gold" style="margin-right:4px;">📄 Report</a>
-                <a href="/admin/events/event/{{ event.id }}/change/" class="btn btn-sm btn-outline-gold">Edit</a>
+              <td class="hide-mobile" style="text-align:right; font-weight:700; color:var(--gold);">₵{{ event.total_revenue }}</td>
+              <td style="text-align:right; white-space:nowrap;">
+                <a href="/results/{{ event.slug }}/" class="btn btn-sm btn-outline-gold">Results</a>
+                <a href="/dashboard/report/{{ event.slug }}/" class="btn btn-sm btn-outline-gold hide-mobile">📄</a>
+                <a href="/admin/events/event/{{ event.id }}/change/" class="btn btn-sm btn-outline-gold hide-mobile">Edit</a>
               </td>
             </tr>
             {% empty %}
@@ -199,7 +235,7 @@
         <div style="display:flex; justify-content:space-between; align-items:center; padding:0.75rem 0; border-bottom:1px solid var(--gray-100); font-size:0.85rem;">
           <div>
             <div style="font-weight:600; margin-bottom:0.15rem;">{{ tx.nominee.name }}</div>
-            <div style="color:var(--gray-400); font-size:0.78rem;">{{ tx.phone_number }} · {{ tx.get_network_display }}</div>
+            <div style="color:var(--gray-400); font-size:0.78rem;">{{ tx.phone_number }}</div>
           </div>
           <div style="text-align:right;">
             <div style="font-weight:700; color:{% if tx.status == 'success' %}var(--red){% else %}var(--gray-400){% endif %};">₵{{ tx.amount }}</div>
@@ -216,19 +252,18 @@
     <!-- Top Nominees -->
     <div style="background:white; border-radius:16px; padding:1.75rem; box-shadow:0 1px 4px rgba(0,0,0,0.08);">
       <h3 style="margin-bottom:1.5rem;">🏆 Top Nominees by Votes</h3>
-      <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px,1fr)); gap:1rem;">
+      <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:1rem;">
         {% for nominee in top_nominees %}
-        <div style="border:1px solid var(--gray-200); border-radius:12px; padding:1.25rem; text-align:center; transition:all 0.2s;"
-             onmouseover="this.style.borderColor='var(--gold)'"
-             onmouseout="this.style.borderColor='var(--gray-200)'">
-          <div style="width:52px; height:52px; border-radius:50%; overflow:hidden; margin:0 auto 0.75rem; background:var(--gray-100); display:flex; align-items:center; justify-content:center; font-size:1.4rem; color:var(--gold); border:2px solid var(--gold);">
-            {% if nominee.photo %}<img src="{{ nominee.photo.url }}" alt="{{ nominee.name }}" style="width:100%;height:100%;object-fit:cover;">
+        <div style="border:1px solid var(--gray-200); border-radius:12px; padding:1rem; text-align:center;">
+          <div style="width:48px; height:48px; border-radius:50%; overflow:hidden; margin:0 auto 0.5rem; background:var(--gray-100); display:flex; align-items:center; justify-content:center; font-size:1.2rem; color:var(--gold); border:2px solid var(--gold);">
+            {% if nominee.photo %}
+              <img src="{{ nominee.photo.url }}" alt="{{ nominee.name }}" style="width:100%;height:100%;object-fit:cover;">
             {% else %}♛{% endif %}
           </div>
-          <div style="font-weight:700; font-size:0.9rem; margin-bottom:0.2rem;">{{ nominee.name }}</div>
-          <div style="color:var(--gray-600); font-size:0.78rem; margin-bottom:0.6rem;">{{ nominee.category.name }}</div>
-          <div style="font-size:1.3rem; font-weight:800; color:var(--red);">{{ nominee.total_votes }}</div>
-          <div style="font-size:0.75rem; color:var(--gray-400);">votes</div>
+          <div style="font-weight:700; font-size:0.85rem; margin-bottom:0.2rem;">{{ nominee.name }}</div>
+          <div style="color:var(--gray-600); font-size:0.75rem; margin-bottom:0.4rem;">{{ nominee.category.name }}</div>
+          <div style="font-size:1.2rem; font-weight:800; color:var(--red);">{{ nominee.total_votes }}</div>
+          <div style="font-size:0.72rem; color:var(--gray-400);">votes</div>
         </div>
         {% empty %}
         <p style="color:var(--gray-400); grid-column:1/-1; text-align:center;">No nominees yet</p>
@@ -240,4 +275,13 @@
 
   </main>
 </div>
+
+<script>
+function toggleSidebar() {
+  const sidebar = document.querySelector('.dash-sidebar');
+  const overlay = document.querySelector('.sidebar-overlay');
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('show');
+}
+</script>
 {% endblock %}

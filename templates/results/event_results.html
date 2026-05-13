@@ -1,9 +1,39 @@
 {% extends 'base/base.html' %}
 {% load static %}
+{% load voting_tags %}
 {% block title %}Live Results — {{ event.title }} — CrownVote{% endblock %}
 
 {% block content %}
-
+{% block extra_css %}
+<style>
+@media (max-width: 768px) {
+  .result-row {
+    padding: 0.9rem 1rem !important;
+    gap: 0.75rem !important;
+  }
+  .result-row > div:first-child {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 0.75rem !important;
+  }
+  .result-row > div:nth-child(2) {
+    width: 40px !important;
+    height: 40px !important;
+  }
+  .result-row strong {
+    font-size: 0.88rem !important;
+  }
+  .result-row .nominee-pct {
+    font-size: 1rem !important;
+    min-width: 44px !important;
+  }
+  .cat-tab {
+    padding: 0.75rem 1rem !important;
+    font-size: 0.82rem !important;
+  }
+}
+</style>
+{% endblock %}
 <!-- Results Header -->
 <div style="background:var(--ash); padding:2.5rem 2rem; border-bottom:4px solid var(--gold);">
   <div class="container">
@@ -106,9 +136,8 @@
 
           <!-- Vote button -->
           {% if event.is_active %}
-          <a href="/voting/{{ nominee.id }}/vote/" class="btn btn-gold btn-sm" style="flex-shrink:0;">Vote</a>
+          <a href="/voting/{{ nominee.id|encoded }}/vote/" class="btn btn-gold btn-sm" style="flex-shrink:0;">Vote</a>
           {% endif %}
-
         </div>
         {% endwith %}
         {% endif %}
