@@ -5,18 +5,20 @@
 {% block title %}Vote for {{ nominee.name }} — {{ event.title }} — CrownVote{% endblock %}
 
 {% block og_tags %}
-{% with photo_url=nominee.photo.url|default:'' %}
-<meta property="og:title"       content="🗳 Vote for {{ nominee.name }} — {{ event.title }}">
-<meta property="og:description" content="Support {{ nominee.name }} in {{ category.name }}! Currently at {{ nominee.total_votes }} votes ({{ nominee.vote_percentage }}%). ₵1 = 1 Vote. Pay via MoMo instantly!">
-<meta property="og:image"       content="{% if nominee.photo %}{{ nominee.photo.url }}{% else %}{{ request.scheme }}://{{ request.get_host }}{% static 'images/crownvote.png' %}{% endif %}">
-<meta property="og:url"         content="{{ campaign_url }}">
-<meta property="og:type"        content="website">
-<meta property="og:site_name"   content="CrownVote">
-<meta name="twitter:card"       content="summary_large_image">
-<meta name="twitter:title"      content="🗳 Vote for {{ nominee.name }} — {{ event.title }}">
+<meta property="og:title"        content="🗳 Vote for {{ nominee.name }} — {{ event.title }}">
+<meta property="og:description"  content="Support {{ nominee.name }} in {{ category.name }}! Currently at {{ nominee.total_votes }} votes ({{ nominee.vote_percentage }}%). ₵1 = 1 Vote. Pay via MoMo instantly!">
+<meta property="og:image"        content="{{ og_image_url }}">
+<meta property="og:image:secure_url" content="{{ og_image_url }}">
+<meta property="og:image:type"   content="image/jpeg">
+<meta property="og:image:width"  content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url"          content="{{ campaign_url }}">
+<meta property="og:type"         content="website">
+<meta property="og:site_name"    content="CrownVote">
+<meta name="twitter:card"        content="summary_large_image">
+<meta name="twitter:title"       content="🗳 Vote for {{ nominee.name }} — {{ event.title }}">
 <meta name="twitter:description" content="Support {{ nominee.name }} in {{ category.name }}! ₵1 = 1 Vote. Pay via MoMo.">
-<meta name="twitter:image"      content="{% if nominee.photo %}{{ nominee.photo.url }}{% else %}{{ request.scheme }}://{{ request.get_host }}{% static 'images/crownvote.png' %}{% endif %}">
-{% endwith %}
+<meta name="twitter:image"       content="{{ og_image_url }}">
 {% endblock %}
 
 {% block extra_css %}

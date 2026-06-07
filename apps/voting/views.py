@@ -227,6 +227,16 @@ def campaign(request, slug, encoded_id):
 
     base_url     = request.build_absolute_uri('/')[:-1]
     campaign_url = f"{base_url}/voting/campaign/{nominee.slug}-{encode_id(nominee.id)}/"
+
+    # Build absolute OG image URL for WhatsApp/Facebook scrapers
+    if nominee.photo:
+        og_image_url = nominee.photo.url
+        # Cloudinary returns absolute HTTPS URLs — ensure no protocol-relative slashes
+        if og_image_url.startswith('//'):
+            og_image_url = 'https:' + og_image_url
+    else:
+        og_image_url = f"{base_url}/static/images/crownvote.png"
+
     whatsapp_msg = (
         f"🗳 Vote for *{nominee.name}* in the *{event.title}*!\n\n"
         f"Category: {category.name}\n"
@@ -247,6 +257,7 @@ def campaign(request, slug, encoded_id):
         'event':            event,
         'category':         category,
         'campaign_url':     campaign_url,
+        'og_image_url':     og_image_url,
         'whatsapp_msg':     whatsapp_msg,
         'other_nominees':   other_nominees,
         'quick_quantities': QUICK_QUANTITIES,
