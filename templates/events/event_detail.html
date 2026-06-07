@@ -1,6 +1,7 @@
 {% extends 'base/base.html' %}
 {% load static %}
 {% load voting_tags %}
+
 {% block title %}{{ event.title }} — CrownVote{% endblock %}
 
 {% block extra_css %}
@@ -214,7 +215,7 @@
       <!-- Category Header -->
       <div class="cat-card-header">
         <div class="cat-card-header-left">
-          <div class="cat-icon">♛</div>
+          <div class="cat-icon" style="font-size:0.65rem; font-weight:800; color:white; letter-spacing:0.02em; line-height:1.1; text-align:center;">{{ category.name|initials }}</div>
           <div>
             <h3 class="cat-title">{{ category.name }}</h3>
             <p class="cat-meta">
