@@ -67,25 +67,6 @@
 
 </section>
 
-<!-- HOW IT WORKS -->
-<section class="section section-alt">
-  <div class="container">
-    <div class="section-title">
-      <h2>How It Works</h2>
-      <div class="underline"></div>
-      <p>Voting is simple, fast and 100% transparent</p>
-    </div>
-    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:2rem; text-align:center;">
-      {% for step in steps %}
-      <div style="background:white; border-radius:16px; padding:2rem 1.5rem; box-shadow:0 1px 3px rgba(0,0,0,0.08);">
-        <div style="font-size:2.5rem; margin-bottom:1rem;">{{ step.icon }}</div>
-        <h4 style="margin-bottom:0.5rem;">{{ step.title }}</h4>
-        <p style="color:var(--gray-600); font-size:0.9rem;">{{ step.desc }}</p>
-      </div>
-      {% endfor %}
-    </div>
-  </div>
-</section>
 
 <!-- Hero Search -->
 <form method="get" action="/search/"
