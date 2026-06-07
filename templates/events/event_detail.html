@@ -3,6 +3,189 @@
 {% load voting_tags %}
 {% block title %}{{ event.title }} — CrownVote{% endblock %}
 
+{% block extra_css %}
+<style>
+  /* ── Category Card ── */
+  .cat-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+    margin-bottom: 2.5rem;
+    border: 1px solid var(--gray-200);
+  }
+
+  .cat-card-header {
+    background: linear-gradient(135deg, var(--ash) 0%, #1e1e1e 100%);
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    border-bottom: 3px solid var(--gold);
+  }
+
+  .cat-card-header-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .cat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--red), var(--gold));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+  }
+
+  .cat-title {
+    color: white;
+    font-size: 1.1rem;
+    margin: 0 0 0.2rem;
+  }
+
+  .cat-meta {
+    color: var(--gray-400);
+    font-size: 0.82rem;
+  }
+
+  .cat-badge {
+    font-size: 0.78rem;
+    color: var(--gold);
+    font-weight: 600;
+    background: rgba(212,175,55,0.15);
+    padding: 0.35rem 0.9rem;
+    border-radius: 100px;
+    border: 1px solid rgba(212,175,55,0.4);
+    white-space: nowrap;
+  }
+
+  .cat-body {
+    padding: 2rem;
+    background: var(--gray-100);
+  }
+
+  /* ── Nominee Cards ── */
+  .nominee-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .nom-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 2px solid var(--gray-200);
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .nom-card:hover {
+    border-color: var(--gold);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+    transform: translateY(-3px);
+  }
+
+  .nom-photo {
+    height: 260px;
+    background: var(--gray-100);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .nom-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+    transition: transform 0.4s ease;
+  }
+
+  .nom-card:hover .nom-photo img { transform: scale(1.05); }
+
+  .nom-photo-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--ash-light), var(--ash));
+    font-size: 4rem;
+    color: var(--gold);
+  }
+
+  .nom-body {
+    padding: 1.25rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .nom-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ash);
+    margin-bottom: 0.4rem;
+  }
+
+  .nom-bio {
+    font-size: 0.82rem;
+    color: var(--gray-600);
+    margin-bottom: 0.75rem;
+    flex: 1;
+  }
+
+  .nom-votes {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+    color: var(--ash);
+  }
+
+  .nom-actions {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .nom-share {
+    display: block;
+    text-align: center;
+    font-size: 0.78rem;
+    color: var(--gray-600);
+    transition: color 0.2s;
+  }
+  .nom-share:hover { color: var(--gold); }
+
+  /* ── Empty state ── */
+  .cat-empty {
+    text-align: center;
+    padding: 2.5rem 1rem;
+    color: var(--gray-400);
+  }
+  .cat-empty .empty-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+
+  @media (max-width: 600px) {
+    .nominee-grid { grid-template-columns: repeat(2, 1fr); }
+    .nom-photo { height: 180px; }
+    .cat-body { padding: 1rem; }
+    .cat-card-header { padding: 1rem 1.25rem; }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 
 <!-- Event Header -->
@@ -22,144 +205,97 @@
 </section>
 
 <!-- Categories -->
-<section class="section">
+<section class="section" style="padding-top:2.5rem;">
   <div class="container">
 
     {% for category in categories %}
-    {% with active_nominees=category.nominees.all %}
+    <div class="cat-card">
 
-    <!-- Category Card -->
-    <div style="margin-bottom:1.5rem; border-radius:16px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,0.08); border:1px solid var(--gray-200);">
-
-      <!-- Clickable Category Header -->
-      <div onclick="toggleCategory('cat-{{ category.id }}', 'arrow-{{ category.id }}')"
-           style="display:flex; justify-content:space-between; align-items:center; padding:1.5rem 2rem;
-                  background:white; cursor:pointer; transition:background 0.2s;"
-           onmouseover="this.style.background='var(--gray-100)'"
-           onmouseout="this.style.background='white'">
-        <div style="display:flex; align-items:center; gap:1rem;">
-          <!-- Category icon -->
-          <div style="width:48px; height:48px; border-radius:12px;
-                      background:linear-gradient(135deg, var(--red), var(--gold));
-                      display:flex; align-items:center; justify-content:center;
-                      font-size:1.4rem; flex-shrink:0;">
-            ♛
-          </div>
+      <!-- Category Header -->
+      <div class="cat-card-header">
+        <div class="cat-card-header-left">
+          <div class="cat-icon">♛</div>
           <div>
-            <h3 style="margin:0; font-size:1.1rem; color:var(--ash);">{{ category.name }}</h3>
-            <p style="margin:0; font-size:0.82rem; color:var(--gray-600); margin-top:0.2rem;">
+            <h3 class="cat-title">{{ category.name }}</h3>
+            <p class="cat-meta">
               {{ category.nominees.all|length }} nominee{{ category.nominees.all|length|pluralize }}
-              · {{ category.total_votes }} vote{{ category.total_votes|pluralize }}
+              &nbsp;·&nbsp; {{ category.total_votes }} vote{{ category.total_votes|pluralize }}
             </p>
           </div>
         </div>
-        <div style="display:flex; align-items:center; gap:1rem;">
-          {% if event.is_active %}
-          <span style="font-size:0.78rem; color:var(--gold); font-weight:600; background:rgba(212,175,55,0.1);
-                        padding:0.3rem 0.8rem; border-radius:100px; border:1px solid var(--gold);">
-            Voting Open
-          </span>
-          {% endif %}
-          <span id="arrow-{{ category.id }}"
-                style="font-size:1.2rem; color:var(--gray-600); transition:transform 0.3s ease; display:inline-block;">
-            ▼
-          </span>
-        </div>
+        {% if event.is_active %}
+        <span class="cat-badge">Voting Open</span>
+        {% endif %}
       </div>
 
-      <!-- Collapsible Nominees Panel -->
-      <div id="cat-{{ category.id }}"
-           style="display:none; background:var(--gray-100); padding:2rem;">
-        <div class="nominees-grid">
-          {% for nominee in category.nominees.all %}
+      <!-- Nominees Grid -->
+      <div class="cat-body">
+        {% with active_nominees=category.nominees.all %}
+        {% if active_nominees %}
+        <div class="nominee-grid">
+          {% for nominee in active_nominees %}
           {% if nominee.is_active %}
-          <div class="nominee-card {% if nominee.is_featured %}featured{% endif %}">
-            <div class="nominee-photo">
+          <div class="nom-card">
+
+            <!-- Photo -->
+            <div class="nom-photo">
               {% if nominee.photo %}
                 <img src="{{ nominee.photo.url }}" alt="{{ nominee.name }}">
               {% else %}
-                <div class="nominee-photo-placeholder">♛</div>
+                <div class="nom-photo-placeholder">♛</div>
               {% endif %}
             </div>
-            <div class="nominee-info" style="text-align:center;">
-              <h4>{{ nominee.name }}</h4>
 
-              <div style="margin-bottom:0.6rem;">
-                <span class="short-code-badge">{{ nominee.short_code }}</span>
-              </div>
+            <!-- Info -->
+            <div class="nom-body">
+              <div class="nom-name">{{ nominee.name }}</div>
+              <span class="short-code-badge" style="margin:0 auto 0.6rem;">{{ nominee.short_code }}</span>
 
               {% if nominee.bio %}
-                <p class="bio">{{ nominee.bio|truncatewords:15 }}</p>
+              <p class="nom-bio">{{ nominee.bio|truncatewords:12 }}</p>
               {% endif %}
 
-              <div class="vote-bar-wrap">
-                <div class="vote-bar-header">
-                  <span>{{ nominee.total_votes }} votes</span>
-                  <span>{{ nominee.vote_percentage }}%</span>
-                </div>
-                <div class="vote-bar-track">
-                  <div class="vote-bar-fill" style="width:{{ nominee.vote_percentage }}%;"></div>
-                </div>
+              <!-- Vote bar -->
+              <div class="nom-votes">
+                <span>{{ nominee.total_votes }} votes</span>
+                <span>{{ nominee.vote_percentage }}%</span>
+              </div>
+              <div class="vote-bar-track">
+                <div class="vote-bar-fill" style="width:{{ nominee.vote_percentage }}%;"></div>
               </div>
 
               {% if event.is_active %}
-              <a href="/voting/{{ nominee.id|encoded }}/vote/"
-                 class="btn btn-primary btn-sm btn-block" style="margin-top:1rem;">
-                🗳 Vote Now
-              </a>
-              <a href="/voting/campaign/{{ nominee.slug }}-{{ nominee.id|encoded }}/"
-                 style="display:block; text-align:center; margin-top:0.5rem; font-size:0.8rem; color:var(--gray-600);">
-                📣 Share campaign page
-              </a>
+              <div class="nom-actions">
+                <a href="/voting/{{ nominee.id|encoded }}/vote/" class="btn btn-primary btn-sm btn-block">
+                  🗳 Vote Now
+                </a>
+                <a href="/voting/campaign/{{ nominee.slug }}-{{ nominee.id|encoded }}/" class="nom-share">
+                  📣 Share campaign page
+                </a>
+              </div>
               {% endif %}
             </div>
+
           </div>
           {% endif %}
           {% endfor %}
         </div>
 
-        {% if not category.nominees.all %}
-        <p style="text-align:center; color:var(--gray-400); padding:2rem 0;">
-          No nominees in this category yet.
-        </p>
+        {% else %}
+        <div class="cat-empty">
+          <div class="empty-icon">🏆</div>
+          <p>No nominees in this category yet.</p>
+        </div>
         {% endif %}
-
+        {% endwith %}
       </div>
-    </div>
 
-    {% endwith %}
+    </div>
     {% empty %}
-    <p style="text-align:center; color:var(--gray-600);">No categories added yet.</p>
+    <p style="text-align:center; color:var(--gray-600); padding:3rem 0;">No categories added yet.</p>
     {% endfor %}
 
   </div>
 </section>
 
-{% endblock %}
-
-{% block extra_js %}
-<script>
-function toggleCategory(panelId, arrowId) {
-  const panel = document.getElementById(panelId);
-  const arrow = document.getElementById(arrowId);
-
-  if (panel.style.display === 'none') {
-    panel.style.display = 'block';
-    arrow.style.transform = 'rotate(180deg)';
-  } else {
-    panel.style.display = 'none';
-    arrow.style.transform = 'rotate(0deg)';
-  }
-}
-
-// Open first category by default
-document.addEventListener('DOMContentLoaded', function () {
-  const firstPanel = document.querySelector('[id^="cat-"]');
-  const firstArrow = document.querySelector('[id^="arrow-"]');
-  if (firstPanel) {
-    firstPanel.style.display = 'block';
-    if (firstArrow) firstArrow.style.transform = 'rotate(180deg)';
-  }
-});
-</script>
 {% endblock %}
