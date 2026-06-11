@@ -1,5 +1,5 @@
 {% extends 'base/base.html' %}
-{% block title %}No Event Assigned — CrownVote{% endblock %}
+{% block title %}No Event Assigned — NobleVote{% endblock %}
 {% block content %}
 <section style="min-height:70vh; display:flex; align-items:center; justify-content:center; text-align:center; padding:3rem 1.5rem;">
   <div style="max-width:480px;">
@@ -7,11 +7,11 @@
     <h2 style="margin-bottom:0.75rem;">No Event Assigned Yet</h2>
     <p style="color:var(--gray-600); margin-bottom:2rem;">
       Your account has been created but no event has been assigned to you yet.
-      Please contact the CrownVote team to get your event set up.
+      Please contact the NobleVote team to get your event set up.
     </p>
     <div style="background:var(--gray-100); border-radius:12px; padding:1.5rem; margin-bottom:2rem; border-left:4px solid var(--gold);">
       <p style="font-size:0.9rem; color:var(--ash-light); margin:0;">
-        📧 Contact your CrownVote administrator to assign your event to this account.
+        📧 Contact your NobleVote administrator to assign your event to this account.
         Your username is <strong>{{ request.user.username }}</strong>.
       </p>
     </div>

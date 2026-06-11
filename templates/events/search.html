@@ -1,7 +1,7 @@
 {% extends 'base/base.html' %}
 {% load static %}
 {% block title %}
-  {% if query %}Search "{{ query }}"{% else %}Search{% endif %} — CrownVote
+  {% if query %}Search "{{ query }}"{% else %}Search{% endif %} — NobleVote
 {% endblock %}
 
 {% block content %}
@@ -10,7 +10,7 @@
 <div style="background:var(--ash); border-bottom:4px solid var(--gold); padding:3rem 2rem;">
   <div class="container" style="max-width:720px;">
     <h2 style="color:white; margin-bottom:1.5rem; text-align:center;">
-      🔍 Search CrownVote
+      🔍 Search NobleVote
     </h2>
     <form method="get" action="/search/">
       <div style="display:flex; gap:0; border-radius:12px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.3);">

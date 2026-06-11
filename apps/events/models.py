@@ -111,7 +111,7 @@ class SiteSettings(models.Model):
                     )
     hero_badge    = models.CharField(
                       max_length=100,
-                      default='CrownVote',
+                      default='NobleVote',
                       help_text='Small badge text above the hero heading'
                     )
 

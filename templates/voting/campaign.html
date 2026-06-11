@@ -2,7 +2,7 @@
 {% load static %}
 
 {% load voting_tags %}
-{% block title %}Vote for {{ nominee.name }} — {{ event.title }} — CrownVote{% endblock %}
+{% block title %}Vote for {{ nominee.name }} — {{ event.title }} — NobleVote{% endblock %}
 
 {% block og_tags %}
 <meta property="og:title"        content="🗳 Vote for {{ nominee.name }} — {{ event.title }}">
@@ -14,7 +14,7 @@
 <meta property="og:image:height" content="630">
 <meta property="og:url"          content="{{ campaign_url }}">
 <meta property="og:type"         content="website">
-<meta property="og:site_name"    content="CrownVote">
+<meta property="og:site_name"    content="NobleVote">
 <meta name="twitter:card"        content="summary_large_image">
 <meta name="twitter:title"       content="🗳 Vote for {{ nominee.name }} — {{ event.title }}">
 <meta name="twitter:description" content="Support {{ nominee.name }} in {{ category.name }}! ₵1 = 1 Vote. Pay via MoMo.">
@@ -306,4 +306,4 @@ function copyLink() {
   });
 }
 </script>
-{% endblock %}
+{% endblock %}                                                                                          

@@ -1,7 +1,7 @@
 {% extends 'base/base.html' %}
 {% load static %}
 {% load voting_tags %}
-{% block title %}Live Results — {{ event.title }} — CrownVote{% endblock %}
+{% block title %}Live Results — {{ event.title }} — NobleVote{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -342,26 +342,4 @@ function refreshResults() {
           const pctEl   = document.querySelector(`.nominee-pct[data-id="${n.id}"]`);
           if (votesEl) votesEl.textContent = n.votes + ' votes';
           if (barEl)   barEl.style.width   = n.percentage + '%';
-          if (pctEl)   pctEl.textContent   = n.percentage + '%';
-        });
-
-        const board = document.getElementById('leaderboard-' + cat.id);
-        if (board) {
-          const rows = Array.from(board.querySelectorAll('.result-row'));
-          rows.sort((a, b) => {
-            const aId  = a.id.replace('nominee-', '');
-            const bId  = b.id.replace('nominee-', '');
-            const aNom = cat.nominees.find(n => n.id == aId);
-            const bNom = cat.nominees.find(n => n.id == bId);
-            return (bNom ? bNom.votes : 0) - (aNom ? aNom.votes : 0);
-          });
-          rows.forEach(r => board.appendChild(r));
-        }
-      });
-    })
-    .catch(err => console.log('Results refresh error:', err));
-}
-
-setInterval(refreshResults, 10000);
-</script>
-{% endblock %}
+          if (pctE

@@ -320,7 +320,7 @@ def download_report(request, slug):
 
     header_left  = logo
     header_mid = [
-        Paragraph('<b>CrownVote</b>', brand_name_style),
+        Paragraph('<b>NobleVote</b>', brand_name_style),
         Spacer(1, 12),
         Paragraph('Official Event Financial Report', report_title_style),
     ]
@@ -551,7 +551,7 @@ def download_report(request, slug):
         canvas_obj.setFillColor(colors.HexColor('#888888'))
         canvas_obj.drawCentredString(
             A4[0]/2, 12,
-            f'CrownVote Financial Report  |  {event.title}  |  Page {doc.page}'
+            f'NobleVote Financial Report  |  {event.title}  |  Page {doc.page}'
         )
 
     doc.build(elements, onFirstPage=add_watermark, onLaterPages=add_watermark)

@@ -2,7 +2,7 @@
 {% load static %}
 {% load voting_tags %}
 
-{% block title %}{{ event.title }} — CrownVote{% endblock %}
+{% block title %}{{ event.title }} — NobleVote{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -41,7 +41,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.4rem;
     flex-shrink: 0;
   }
 
@@ -215,7 +214,9 @@
       <!-- Category Header -->
       <div class="cat-card-header">
         <div class="cat-card-header-left">
-          <div class="cat-icon" style="font-size:0.65rem; font-weight:800; color:white; letter-spacing:0.02em; line-height:1.1; text-align:center;">{{ category.name|initials }}</div>
+          <div class="cat-icon" style="font-size:0.65rem; font-weight:800; color:white; letter-spacing:0.02em; line-height:1.1; text-align:center;">
+            {{ category.name|initials }}
+          </div>
           <div>
             <h3 class="cat-title">{{ category.name }}</h3>
             <p class="cat-meta">

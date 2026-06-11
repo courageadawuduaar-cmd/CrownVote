@@ -5,9 +5,9 @@ from .models import Event, HeroVideo, SiteSettings
 # ─────────────────────────────────────────
 # Customize Django Admin Branding
 # ─────────────────────────────────────────
-admin.site.site_header  = '♛ CrownVote Control Panel'
-admin.site.site_title   = 'CrownVote Admin'
-admin.site.index_title  = 'Welcome to CrownVote Control Panel'
+admin.site.site_header  = '♛ NobleVote Control Panel'
+admin.site.site_title   = 'NobleVote Admin'
+admin.site.index_title  = 'Welcome to NobleVote Control Panel'
 
 
 @admin.register(Event)
