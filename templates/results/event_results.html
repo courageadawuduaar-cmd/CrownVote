@@ -342,4 +342,13 @@ function refreshResults() {
           const pctEl   = document.querySelector(`.nominee-pct[data-id="${n.id}"]`);
           if (votesEl) votesEl.textContent = n.votes + ' votes';
           if (barEl)   barEl.style.width   = n.percentage + '%';
-          if (pctE
+          if (pctEl)   pctEl.textContent   = n.percentage + '%';
+        });
+      });
+    })
+    .catch(err => console.error('Failed to refresh results:', err));
+}
+
+setInterval(refreshResults, 10000);
+</script>
+{% endblock %}
