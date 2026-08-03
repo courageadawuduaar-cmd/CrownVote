@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 from .models import Event, HeroVideo, SiteSettings
+from django import forms
 
 # ─────────────────────────────────────────
 # Customize Django Admin Branding
@@ -38,8 +39,18 @@ class EventAdmin(admin.ModelAdmin):
     )
 
 
+class HeroVideoForm(forms.ModelForm):
+    class Meta:
+        model = HeroVideo
+        fields = '__all__'
+        widgets = {
+            'video': forms.ClearableFileInput(attrs={'accept': 'video/*'}),
+        }
+
+
 @admin.register(HeroVideo)
 class HeroVideoAdmin(admin.ModelAdmin):
+    form = HeroVideoForm
     list_display  = ('title', 'order', 'is_active', 'hero_heading', 'video_preview', 'created_at')
     list_editable = ('order', 'is_active')
     ordering      = ('order',)
