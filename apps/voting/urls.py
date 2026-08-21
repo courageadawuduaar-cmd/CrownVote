@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from . import views_ussd
 
 app_name = 'voting'
 
@@ -11,4 +12,5 @@ urlpatterns = [
     path('webhook/paystack/',                   views.paystack_webhook, name='paystack_webhook'),
     path('status/<str:reference>/',             views.payment_status,   name='status'),
     path('pending/<str:reference>/',            views.payment_pending,  name='pending'),
+    path('ussd/callback/',                      views_ussd.ussd_callback, name='ussd_callback'),
 ]
