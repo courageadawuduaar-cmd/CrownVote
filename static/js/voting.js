@@ -1,5 +1,6 @@
 let currentQty = 1;
-const PRICE_PER_VOTE = 1;
+const priceDisplayEl = document.querySelector('.price-display');
+const PRICE_PER_VOTE = priceDisplayEl ? parseFloat(priceDisplayEl.dataset.pricePerVote) : 1;
 
 function updateDisplay() {
   document.getElementById('qtyDisplay').textContent = currentQty;

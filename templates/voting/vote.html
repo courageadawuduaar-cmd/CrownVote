@@ -29,7 +29,7 @@
     <!-- Vote Panel -->
     <div class="vote-panel">
       <h2 style="text-align:center; margin-bottom:0.25rem;">Cast Your Votes</h2>
-      <p class="subtitle">₵1 = 1 Vote · Unlimited voting allowed</p>
+      <p class="subtitle">₵{{ nominee.category.event.price_per_vote|floatformat:2 }} = 1 Vote · Unlimited voting allowed</p>
 
       {% if messages %}
         {% for message in messages %}
@@ -57,9 +57,9 @@
         </div>
 
         <!-- Price Display -->
-        <div class="price-display">
+        <div class="price-display" data-price-per-vote="{{ nominee.category.event.price_per_vote }}">
           <span class="label">Total Amount</span>
-          <span class="amount" id="priceDisplay">₵1.00</span>
+          <span class="amount" id="priceDisplay">₵{{ nominee.category.event.price_per_vote|floatformat:2 }}</span>
         </div>
 
         <input type="hidden" name="network_selected" value="mtn">

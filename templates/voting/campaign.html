@@ -6,7 +6,7 @@
 
 {% block og_tags %}
 <meta property="og:title"        content="🗳 Vote for {{ nominee.name }} — {{ event.title }}">
-<meta property="og:description"  content="Support {{ nominee.name }} in {{ category.name }}! Currently at {{ nominee.total_votes }} votes ({{ nominee.vote_percentage }}%). ₵1 = 1 Vote. Pay via MoMo instantly!">
+<meta property="og:description"  content="Support {{ nominee.name }} in {{ category.name }}! Currently at {{ nominee.total_votes }} votes ({{ nominee.vote_percentage }}%). ₵{{ event.price_per_vote|floatformat:2 }} = 1 Vote. Pay via MoMo instantly!">
 <meta property="og:image"        content="{{ og_image_url }}">
 <meta property="og:image:secure_url" content="{{ og_image_url }}">
 <meta property="og:image:type"   content="image/jpeg">
@@ -17,7 +17,7 @@
 <meta property="og:site_name"    content="NobleVote">
 <meta name="twitter:card"        content="summary_large_image">
 <meta name="twitter:title"       content="🗳 Vote for {{ nominee.name }} — {{ event.title }}">
-<meta name="twitter:description" content="Support {{ nominee.name }} in {{ category.name }}! ₵1 = 1 Vote. Pay via MoMo.">
+<meta name="twitter:description" content="Support {{ nominee.name }} in {{ category.name }}! ₵{{ event.price_per_vote|floatformat:2 }} = 1 Vote. Pay via MoMo.">
 <meta name="twitter:image"       content="{{ og_image_url }}">
 {% endblock %}
 
@@ -148,7 +148,7 @@
     <div style="display:flex; gap:0.75rem; justify-content:center; flex-wrap:wrap; margin-bottom:2rem;">
       <div class="stat-pill">🗳 <strong style="color:var(--gold);">{{ nominee.total_votes }}</strong>&nbsp;votes</div>
       <div class="stat-pill">📊 <strong style="color:var(--gold);">{{ nominee.vote_percentage }}%</strong>&nbsp;of category</div>
-      <div class="stat-pill">💰 ₵1 = 1 Vote</div>
+      <div class="stat-pill">💰 ₵{{ event.price_per_vote|floatformat:2 }} = 1 Vote</div>
     </div>
 
     <!-- Vote Progress -->
@@ -167,7 +167,7 @@
     {% if event.is_active %}
     <a href="/voting/{{ encoded_id }}/vote/" class="btn btn-primary btn-lg"
        style="font-size:1.1rem; padding:1rem 3rem; box-shadow:0 4px 20px rgba(200,16,46,0.4);">
-      🗳 Vote Now — ₵1 per Vote
+      🗳 Vote Now — ₵{{ event.price_per_vote|floatformat:2 }} per Vote
     </a>
     {% else %}
     <div style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:1rem 2rem; display:inline-block; color:var(--gray-400);">
@@ -231,7 +231,7 @@
     <div style="background:var(--ash); border-radius:20px; padding:2rem; border-bottom:4px solid var(--gold); margin-bottom:2rem; text-align:center;">
       <h3 style="color:white; margin-bottom:0.4rem;">Ready to Vote?</h3>
       <p style="color:var(--gray-400); font-size:0.9rem; margin-bottom:1.5rem;">
-        ₵1 = 1 Vote · Pay instantly via Mobile Money
+        ₵{{ event.price_per_vote|floatformat:2 }} = 1 Vote · Pay instantly via Mobile Money
       </p>
       <div style="display:flex; gap:0.75rem; justify-content:center; flex-wrap:wrap; margin-bottom:1.5rem;">
         {% for q in quick_quantities %}
