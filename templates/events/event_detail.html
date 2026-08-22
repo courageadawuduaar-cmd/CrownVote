@@ -201,6 +201,10 @@
       <span>📅 {{ event.start_date|date:"M d" }} – {{ event.end_date|date:"M d, Y" }}</span>
       <span>🗳 {{ event.total_votes }} total votes</span>
     </div>
+    <div class="event-countdown"
+         data-start="{{ event.start_date|date:'c' }}"
+         data-end="{{ event.end_date|date:'c' }}"
+         style="margin-top:0.75rem; font-size:0.95rem; color:var(--gold); font-weight:700;"></div>
   </div>
 </section>
 
@@ -300,4 +304,8 @@
   </div>
 </section>
 
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/countdown.js' %}"></script>
 {% endblock %}

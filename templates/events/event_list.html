@@ -1,4 +1,5 @@
 {% extends 'base/base.html' %}
+{% load static %}
 {% block title %}All Events — NobleVote{% endblock %}
 {% block content %}
 <section class="section">
@@ -21,6 +22,10 @@
             <span>📅 {{ event.end_date|date:"M d, Y" }}</span>
             <span>🗳 {{ event.total_votes }} votes</span>
           </div>
+          <div class="event-countdown"
+               data-start="{{ event.start_date|date:'c' }}"
+               data-end="{{ event.end_date|date:'c' }}"
+               style="margin-top:0.5rem; font-size:0.82rem; color:var(--gold); font-weight:600;"></div>
           <span class="btn btn-primary btn-sm btn-block">View Event</span>
         </div>
       </a>
@@ -30,4 +35,8 @@
     </div>
   </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/countdown.js' %}"></script>
 {% endblock %}
