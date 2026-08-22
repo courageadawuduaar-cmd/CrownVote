@@ -35,7 +35,7 @@ def ussd_callback(request):
         return ussd(
             f'CON Vote for {nominee.name}\n'
             f'{nominee.category.name} — {nominee.category.event.title}\n'
-            f'Enter number of votes (₵1 each):'
+            f'Enter number of votes (₵{nominee.category.event.price_per_vote:g} each):'
         )
 
     # Step 2: quantity entered
@@ -68,7 +68,7 @@ def ussd_callback(request):
         if not nominee:
             return ussd('END Nominee no longer available.')
 
-        amount = quantity * 1  # ₵1 per vote, same as web flow
+        amount = quantity * nominee.category.event.price_per_vote
         reference = f'CV-USSD-{uuid.uuid4().hex[:10].upper()}'
         email = f'{phone}@crownvote.gh'
 

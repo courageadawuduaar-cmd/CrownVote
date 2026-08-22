@@ -53,7 +53,7 @@ def vote(request, encoded_id):
             messages.error(request, 'Please enter a valid 10-digit phone number.')
             return redirect(f'/voting/{encoded_id}/vote/')
 
-        amount    = quantity * 1  # ₵1 per vote
+        amount    = quantity * event.price_per_vote
         reference = f'CV-{uuid.uuid4().hex[:12].upper()}'
         email     = f'{phone_number}@crownvote.gh'
 
@@ -242,7 +242,7 @@ def campaign(request, slug, encoded_id):
         f"Category: {category.name}\n"
         f"Current votes: {nominee.total_votes}\n\n"
         f"Click the link below to vote now 👇\n"
-        f"₵1 = 1 Vote | Pay via MoMo\n\n"
+        f"₵{event.price_per_vote:g} = 1 Vote | Pay via MoMo\n\n"
         f"{campaign_url}"
     )
 

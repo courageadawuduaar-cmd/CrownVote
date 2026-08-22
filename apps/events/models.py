@@ -26,6 +26,14 @@ class Event(models.Model):
                         default=Decimal('11.00'),
                         help_text='Commission percentage deducted from revenue (e.g. 11.00 = 11%)'
                       )
+
+    price_per_vote  = models.DecimalField(
+                        max_digits=6,
+                        decimal_places=2,
+                        default=Decimal('1.00'),
+                        help_text='Price per vote in GHS, set per organizer agreement'
+                      )
+
     organizer       = models.ForeignKey(
                         User, on_delete=models.SET_NULL,
                         null=True, blank=True,
@@ -52,7 +60,12 @@ class Event(models.Model):
 
     @property
     def total_revenue(self):
-        return Decimal(self.total_votes)
+        return sum(
+            (vote.amount_paid for cat in self.categories.all()
+             for nom in cat.nominees.all()
+             for vote in nom.votes.all()),
+            Decimal('0')
+        )
 
     @property
     def commission_amount(self):
