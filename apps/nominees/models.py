@@ -4,12 +4,11 @@ from cloudinary.models import CloudinaryField
 
 
 def generate_short_code():
-    """Generate unique 6-char alphanumeric code e.g. CV7K2X"""
+    """Generate unique 5-digit numeric code, easy to dial via USSD"""
     while True:
-        code = 'CV' + get_random_string(4, 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789')
+        code = get_random_string(5, '0123456789')
         if not Nominee.objects.filter(short_code=code).exists():
             return code
-
 
 class Nominee(models.Model):
     category    = models.ForeignKey('categories.Category', on_delete=models.CASCADE, related_name='nominees')
