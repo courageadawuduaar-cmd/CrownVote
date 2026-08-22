@@ -15,14 +15,14 @@ admin.site.index_title  = 'Welcome to NobleVote Control Panel'
 class EventAdmin(admin.ModelAdmin):
     list_display  = (
         'title', 'status', 'organizer',
-        'commission_rate', 'total_votes',
+        'price_per_vote', 'commission_rate', 'total_votes',
         'total_revenue', 'net_revenue',
         'show_results'
     )
     list_filter   = ('status',)
     search_fields = ('title', 'organizer__username')
     prepopulated_fields = {'slug': ('title',)}
-    list_editable = ('status', 'show_results', 'commission_rate')
+    list_editable = ('status', 'show_results', 'price_per_vote', 'commission_rate')
     ordering      = ('-created_at',)
 
     fieldsets = (
@@ -33,8 +33,8 @@ class EventAdmin(admin.ModelAdmin):
             'fields': ('start_date', 'end_date')
         }),
         ('Organizer & Commission', {
-            'fields': ('organizer', 'commission_rate'),
-            'description': 'Set the organizer account and commission rate for this event.'
+            'fields': ('organizer', 'price_per_vote', 'commission_rate'),
+            'description': 'Set the organizer account, price per vote, and commission rate for this event.'
         }),
     )
 
