@@ -20,6 +20,10 @@ class Event(models.Model):
     start_date      = models.DateTimeField()
     end_date        = models.DateTimeField()
     show_results    = models.BooleanField(default=True)
+    display_order   = models.PositiveIntegerField(
+                        default=0,
+                        help_text='Lower numbers show first. Change anytime to reorder events.'
+                      )
     commission_rate = models.DecimalField(
                         max_digits=5,
                         decimal_places=2,
@@ -44,7 +48,7 @@ class Event(models.Model):
     updated_at      = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['display_order', '-created_at']
 
     def __str__(self):
         return self.title

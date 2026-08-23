@@ -15,8 +15,8 @@ STEPS = [
 
 
 def home(request):
-    active_events = Event.objects.filter(status='active').order_by('-created_at')
-    all_events    = Event.objects.exclude(status='draft').order_by('-created_at')
+    active_events = Event.objects.filter(status='active')
+    all_events    = Event.objects.exclude(status='draft')
     settings_obj  = SiteSettings.get()
 
     db_videos = HeroVideo.objects.filter(is_active=True).order_by('order')
@@ -44,7 +44,7 @@ def home(request):
     })
 
 def event_list(request):
-    events = Event.objects.exclude(status='draft').order_by('-created_at')
+    events = Event.objects.exclude(status='draft')
     return render(request, 'events/event_list.html', {'events': events})
 
 

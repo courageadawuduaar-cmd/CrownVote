@@ -14,7 +14,7 @@ admin.site.index_title  = 'Welcome to NobleVote Control Panel'
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
     list_display  = (
-        'title', 'status', 'organizer',
+        'title', 'status', 'organizer', 'display_order',
         'price_per_vote', 'commission_rate', 'total_votes',
         'total_revenue', 'net_revenue',
         'show_results'
@@ -22,12 +22,12 @@ class EventAdmin(admin.ModelAdmin):
     list_filter   = ('status',)
     search_fields = ('title', 'organizer__username')
     prepopulated_fields = {'slug': ('title',)}
-    list_editable = ('status', 'show_results', 'price_per_vote', 'commission_rate')
-    ordering      = ('-created_at',)
+    list_editable = ('status', 'show_results', 'price_per_vote', 'commission_rate', 'display_order')
+    ordering      = ('display_order', '-created_at')
 
     fieldsets = (
         ('Event Info', {
-            'fields': ('title', 'slug', 'description', 'banner', 'status', 'show_results')
+            'fields': ('title', 'slug', 'description', 'banner', 'status', 'show_results', 'display_order')
         }),
         ('Schedule', {
             'fields': ('start_date', 'end_date')
