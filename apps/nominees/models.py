@@ -44,7 +44,7 @@ class Nominee(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.short_code:
-            self.short_code = generate_short_code()
+            self.short_code = generate_short_code(self.category.event)
         super().save(*args, **kwargs)
 
     @property
