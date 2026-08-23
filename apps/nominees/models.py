@@ -1,14 +1,28 @@
+import re
 from django.db import models
 from django.utils.crypto import get_random_string
 from cloudinary.models import CloudinaryField
 
+STOPWORDS = {'AND', 'OF', 'THE', 'FOR', 'IN', 'A', 'AN', 'TO', 'AT', 'ON'}
 
-def generate_short_code():
-    """Generate unique 5-digit numeric code, easy to dial via USSD"""
+
+def generate_short_code(event):
+    """
+    Generate a code like PDAN01 — initials from the event title
+    (skipping small words like AND/OF/THE) followed by a sequential number.
+    """
+    words = re.findall(r"[A-Za-z]+", event.title.replace("'", ""))
+    initials = ''.join(w[0].upper() for w in words if w.upper() not in STOPWORDS)
+    if not initials:
+        initials = 'EV'
+    initials = initials[:6]
+
+    n = 1
     while True:
-        code = get_random_string(5, '0123456789')
+        code = f"{initials}{n:02d}"
         if not Nominee.objects.filter(short_code=code).exists():
             return code
+        n += 1
 
 class Nominee(models.Model):
     category    = models.ForeignKey('categories.Category', on_delete=models.CASCADE, related_name='nominees')
