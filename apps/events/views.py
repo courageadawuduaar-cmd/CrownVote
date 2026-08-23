@@ -67,7 +67,7 @@ def search(request):
         events = Event.objects.exclude(status='draft').filter(
             Q(title__icontains=query) |
             Q(description__icontains=query)
-        ).order_by('-created_at')
+        )
 
         categories = Category.objects.filter(
             Q(name__icontains=query),
