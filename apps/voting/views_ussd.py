@@ -1,6 +1,6 @@
 import uuid
 
-from django.http import HttpResponse
+from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from apps.nominees.models import Nominee
@@ -12,28 +12,34 @@ PROVIDER_MAP = {'mtn': 'mtn', 'telecel': 'vod', 'airtel': 'tgo'}
 NETWORK_LABELS = {'1': 'mtn', '2': 'telecel', '3': 'airtel'}
 
 
-def ussd(text):
-    return HttpResponse(text, content_type='text/plain')
+def ussd(message, end=False):
+    return JsonResponse({
+        'continueSession': not end,
+        'message': message,
+    })
 
 
 @csrf_exempt
 def ussd_callback(request):
-    phone = request.POST.get('msisdn', '').strip()
-    user_input = request.POST.get('userInput', '').strip()
+    phone = (request.POST.get('phoneNumber') or request.POST.get('msisdn') or '').strip()
+    user_input = request.POST.get('text')
+    if user_input is None:
+        user_input = request.POST.get('userInput', '')
+    user_input = user_input.strip()
     steps = user_input.split('*') if user_input else []
 
     # Step 0: session just started
     if not steps or steps == ['']:
-        return ussd('CON Welcome to NobleVote\nEnter nominee code:')
+        return ussd('Welcome to NobleVote\nEnter nominee code:')
 
     # Step 1: nominee short_code entered
     if len(steps) == 1:
         code = steps[0].strip().upper()
         nominee = Nominee.objects.filter(short_code=code, is_active=True).first()
         if not nominee or not nominee.category.event.is_active:
-            return ussd('END Invalid code or voting closed.')
+            return ussd('Invalid code or voting closed.', end=True)
         return ussd(
-            f'CON Vote for {nominee.name}\n'
+            f'Vote for {nominee.name}\n'
             f'{nominee.category.name} — {nominee.category.event.title}\n'
             f'Enter number of votes (₵{nominee.category.event.price_per_vote:g} each):'
         )
@@ -43,11 +49,11 @@ def ussd_callback(request):
         try:
             quantity = int(steps[1])
         except ValueError:
-            return ussd('END Invalid number.')
+            return ussd('Invalid number.', end=True)
         if quantity < 1:
-            return ussd('END Please enter at least 1 vote.')
+            return ussd('Please enter at least 1 vote.', end=True)
         return ussd(
-            'CON Select network:\n'
+            'Select network:\n'
             '1. MTN MoMo\n'
             '2. Telecel Cash\n'
             '3. AirtelTigo Money'
@@ -59,14 +65,14 @@ def ussd_callback(request):
         try:
             quantity = int(steps[1])
         except ValueError:
-            return ussd('END Invalid number.')
+            return ussd('Invalid number.', end=True)
         network = NETWORK_LABELS.get(steps[2].strip())
         if not network:
-            return ussd('END Invalid network selection.')
+            return ussd('Invalid network selection.', end=True)
 
         nominee = Nominee.objects.filter(short_code=code, is_active=True).first()
         if not nominee:
-            return ussd('END Nominee no longer available.')
+            return ussd('Nominee no longer available.', end=True)
 
         amount = quantity * nominee.category.event.price_per_vote
         reference = f'CV-USSD-{uuid.uuid4().hex[:10].upper()}'
@@ -97,10 +103,11 @@ def ussd_callback(request):
 
         if result.get('status'):
             return ussd(
-                f'END Approve the {network.upper()} prompt on your phone '
-                f'to complete {quantity} vote(s) for {nominee.name}.'
+                f'Approve the {network.upper()} prompt on your phone '
+                f'to complete {quantity} vote(s) for {nominee.name}.',
+                end=True,
             )
         else:
-            return ussd('END Payment could not be started. Please try again.')
+            return ussd('Payment could not be started. Please try again.', end=True)
 
-    return ussd('END Session ended.')
+    return ussd('Session ended.', end=True)
