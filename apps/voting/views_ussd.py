@@ -1,3 +1,4 @@
+import json
 import uuid
 
 from django.http import JsonResponse
@@ -19,13 +20,24 @@ def ussd(message, end=False):
     })
 
 
+def _get_params(request):
+    """Arkesel may send form-encoded or JSON — handle both."""
+    if request.content_type == 'application/json':
+        try:
+            return json.loads(request.body or '{}')
+        except json.JSONDecodeError:
+            return {}
+    return request.POST
+
+
 @csrf_exempt
 def ussd_callback(request):
-    phone = (request.POST.get('phoneNumber') or request.POST.get('msisdn') or '').strip()
-    user_input = request.POST.get('text')
+    params = _get_params(request)
+    phone = (params.get('phoneNumber') or params.get('msisdn') or '').strip()
+    user_input = params.get('text')
     if user_input is None:
-        user_input = request.POST.get('userInput', '')
-    user_input = user_input.strip()
+        user_input = params.get('userInput', '')
+    user_input = (user_input or '').strip()
     steps = user_input.split('*') if user_input else []
 
     # Step 0: session just started
