@@ -109,6 +109,7 @@ BASE_URL = config('BASE_URL', default='http://127.0.0.1:8000')
 # ─────────────────────────────────────────
 if not DEBUG:
     SECURE_SSL_REDIRECT            = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SESSION_COOKIE_SECURE          = True
     CSRF_COOKIE_SECURE             = True
     SECURE_HSTS_SECONDS            = 31536000
